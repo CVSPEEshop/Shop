@@ -11,11 +11,11 @@
     <meta property="og:site_name" content="CVSPEE">
     <meta property="og:title" content="CVSPEE - CvSU Shop">
     <meta property="og:description" content="Shop official Cavite State University uniforms, school supplies, and campus essentials at CVSPEE.">
-    <meta property="og:image" content="https://jhaydiazu113-sudo.github.io/images/logo.png">
-    <meta property="og:url" content="https://jhaydiazu113-sudo.github.io/">
+    <meta property="og:image" content="https://cvspeeofficial.github.io/CvSPEE-main/images/logo.png">
+    <meta property="og:url" content="https://cvspeeofficial.github.io/CvSPEE-main/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="CVSPEE - CvSU Campus Shop">
-    <meta name="twitter:image" content="https://jhaydiazu113-sudo.github.io/images/logo.png">
+    <meta name="twitter:image" content="https://cvspeeofficial.github.io/CvSPEE-main/images/logo.png">
 
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="apple-touch-icon" href="images/logo.png">
@@ -93,9 +93,9 @@ ul {
 }
 
 .logo img {
-    height: 68px;
+    height: 84px;
     width: auto;
-    max-width: 260px;
+    max-width: 320px;
     object-fit: contain;
     display: block;
 }
@@ -121,7 +121,8 @@ ul {
     }
 
     .logo img {
-        height: 44px;
+        height: 62px;
+        max-width: 58vw;
     }
 
     .logo-tagline {
@@ -1786,7 +1787,6 @@ body.dark-mode .auth-pw-toggle:hover {
     padding: 35px 20px 16px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
     text-align: center;
-    /* always fit inside the screen so the Capture button is never cut off */
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 24px);
@@ -1818,7 +1818,6 @@ body.dark-mode .auth-pw-toggle:hover {
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 12px;
-    /* shrinks when the screen is short, video is cropped with object-fit: cover */
     flex: 1 1 auto;
     min-height: 120px;
 }
@@ -1839,7 +1838,6 @@ body.dark-mode .auth-pw-toggle:hover {
     transition: border-color 0.2s ease, left 0.15s linear, top 0.15s linear, width 0.15s linear, height 0.15s linear;
 }
 
-/* ID card found: box follows the card */
 .id-scan-guide.id-scan-guide-tracking {
     border-style: solid;
     border-color: #f1c40f;
@@ -5582,7 +5580,6 @@ body.dark-mode .wishlist-item {
 }
 
     
-/* ===================== Front page slideshow ===================== */
 .home-slider {
     position: relative;
     overflow: hidden;
@@ -5708,7 +5705,6 @@ body.dark-mode .wishlist-item {
     border-radius: 0;
 }
 
-/* ambient glow: a blurred copy of the photo/video behind it */
 .hs-ambient {
     position: absolute;
     inset: 0;
@@ -5830,7 +5826,6 @@ body.dark-mode .wishlist-item {
     }
 }
 
-/* ---- owner: front page editor ---- */
 .profile-customize-btn {
     display: inline-block;
     margin-top: 12px;
@@ -5893,7 +5888,6 @@ body.dark-mode .wishlist-item {
     align-items: flex-start;
 }
 
-/* side by side when there's room, stacked when there isn't — never stretched by long text */
 .he-list-col {
     flex: 1 1 240px;
     max-width: 100%;
@@ -6050,7 +6044,6 @@ body.dark-mode .wishlist-item {
     margin-top: 14px;
 }
 
-/* Save, Cancel and Reset: same compact size */
 .he-actions .btn,
 .he-actions .he-secondary,
 .he-actions .he-danger {
@@ -6132,7 +6125,6 @@ body.dark-mode .he-form-col textarea {
 }
 
 
-/* ===================== CvSU official theme ===================== */
 :root {
     --cvsu-green: #0B5C2E;
     --cvsu-green-dark: #084522;
@@ -6157,7 +6149,6 @@ h3,
     letter-spacing: 0;
 }
 
-/* navigation */
 .site-navbar {
     border-bottom: 3px solid var(--cvsu-gold);
 }
@@ -6167,7 +6158,6 @@ h3,
     letter-spacing: 0.02em;
 }
 
-/* section titles: gold rule */
 .title::after {
     background: var(--cvsu-gold);
     width: 90px;
@@ -6175,7 +6165,6 @@ h3,
     border-radius: 0;
 }
 
-/* buttons: formal, squared corners */
 .btn,
 .btn-neutral-outline,
 .social-btn,
@@ -6209,7 +6198,6 @@ h3,
     background: var(--cvsu-green);
 }
 
-/* cards */
 .product-card img {
     border-radius: 3px;
 }
@@ -6222,12 +6210,10 @@ h3,
     transform: translateY(-3px);
 }
 
-/* soft banner background */
 .offer {
     background: linear-gradient(135deg, var(--cvsu-cream), var(--cvsu-sage));
 }
 
-/* footer: deep CvSU green with a gold top border */
 .footer {
     background: var(--cvsu-green-deep);
     color: #cfdacf;
@@ -6255,7 +6241,6 @@ body.dark-mode .footer {
     background: #050f09;
 }
 
-/* slideshow: gold rule under the title, formal corners */
 .hs-rule {
     width: 72px;
     height: 3px;
@@ -6291,7 +6276,6 @@ body.dark-mode .footer {
 }
 
 
-/* ===================== Product gender + photo slideshow ===================== */
 .pd-gallery {
     position: relative;
     width: 220px;
@@ -6454,8 +6438,6 @@ body.dark-mode .category-filter-panel .filter-group-label {
 }
 
 
-/* product list header: on small screens the "New Product" filter and the "Add Product"
-   button go on their own row under the title so they don't crowd it */
 @media only screen and (max-width: 760px) {
     .product-section-head {
         flex-wrap: wrap;
@@ -6478,7 +6460,6 @@ body.dark-mode .category-filter-panel .filter-group-label {
     }
 }
 
-/* ===================== Filters: scalable layout ===================== */
 .filters-btn {
     border-radius: 6px;
 }
@@ -6673,7 +6654,6 @@ body.dark-mode .category-filter-panel .filter-group-label {
     cursor: pointer;
 }
 
-/* phones: the panel becomes a bottom sheet so a long list never covers the products */
 @media only screen and (max-width: 600px) {
     .filter-backdrop.show {
         display: block;
@@ -6736,7 +6716,6 @@ body.dark-mode .af-chip {
     color: #bfe3c9;
 }
 
-/* price range filter */
 .fs-price {
     display: flex;
     align-items: center;
@@ -6805,7 +6784,6 @@ body.dark-mode .fs-price-field {
     border-color: #444;
 }
 
-/* ===================== Size chart ===================== */
 .pd-sizechart {
     margin: 14px 0 6px;
     padding-top: 14px;
@@ -6999,7 +6977,6 @@ body.dark-mode .sc-subtitle {
     color: #ccc;
 }
 
-/* info pages: Terms, Data Privacy, How to Order, Size Guide */
 .info-content.info-left,
 .info-left {
     text-align: left;
@@ -7038,7 +7015,6 @@ body.dark-mode .info-content em {
     color: #ddd;
 }
 
-/* product chat: size buttons stay visible so the size can be changed, + size chart bubble */
 .chat-choice-btn.selected {
     background: #0B5C2E;
     color: #fff;
@@ -7076,6 +7052,26 @@ body.dark-mode .chat-choice-btn.selected {
 body.dark-mode .chat-bubble.chat-bubble-chart {
     background: #1e1e1e;
     border-color: #333;
+}
+
+.site-navbar .logo .logo-tagline { display: none !important; }
+.site-navbar .logo img {
+    height: 70px !important;
+    width: auto !important;
+    max-width: none !important;
+}
+@media only screen and (max-width: 800px) {
+    .site-navbar .logo {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+    }
+    .site-navbar .logo img {
+        height: auto !important;
+        width: auto !important;
+        max-width: 100% !important;
+        max-height: 44px !important;
+        object-fit: contain;
+    }
 }
 </style>
 
@@ -8194,8 +8190,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             </button>
 
             <div class="logo">
-                <img src="images/logo.png" alt="CVSPEE">
-                <span class="logo-tagline">Cavite State University - Campus Shop</span>
+                <img src="images/logo.png?v=2" alt="CVSPEE">
             </div>
 
             <nav>
@@ -9179,7 +9174,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             <div class="footer-col-2">
 
                 <img
-                    src="images/logo-white.png"
+                    src="images/logo.png"
                     width="125px"
                 >
 
@@ -9188,11 +9183,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                     and Benefits of Sports Accessible to the Many.
                 </p>
 
-                <!-- Temporarily hidden: "Questions about an order? Contact us."
-                <p>
-                    Questions about an order? <a href="#contact" onclick="goToPageByKey('contact'); return false;" style="color:#fff;text-decoration:underline;">Contact us</a>.
-                </p>
-                -->
 
             </div>
 
@@ -9264,6 +9254,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 </script>
 
 <script>
+
+    var BACKEND_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
 
     var MenuItems = document.getElementById("MenuItems");
 
@@ -9490,8 +9482,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return null;
     }
 
-    // Products used to live in ONE document (cvspee/products) -> Firestore's 1 MB limit made the
-    // 10th product fail to save. Now every product is its own document in "cvspeeProducts".
     var _productsMode = "perdoc";
     var _pSync = { prod: false, meta: false };
     var _legacyAttached = false;
@@ -9591,7 +9581,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         });
     }
 
-    // Fallback (old behaviour) only if Firestore rules block the new collection.
     function attachLegacyProducts() {
         if (_legacyAttached) return;
         _legacyAttached = true;
@@ -9871,7 +9860,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         btn.title = label;
     }
 
-    // put every password field back to hidden (e.g. when switching tabs)
     function hideAllPasswords() {
         var btns = document.querySelectorAll(".auth-pw-toggle");
         for (var i = 0; i < btns.length; i++) {
@@ -9962,14 +9950,13 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         if (scanBtn) scanBtn.textContent = "📷 Scan ID & Selfie";
     }
 
-    var VERIFY_ID_ENDPOINT = "https://cvspee-production.up.railway.app/api/verify-id";
+    var VERIFY_ID_ENDPOINT = BACKEND_URL + "/api/verify-id";
 
     var idScanStream = null;
     var idScanMode = "id";
     var signupCapturedIdImage = null;
     var signupCapturedSelfieImage = null;
 
-    // The form must be filled up first: the AI compares the ID against what was typed.
     function validateSignupFieldsBeforeScan() {
         var errorEl = document.getElementById("signupError");
         function fail(msg, fieldId) {
@@ -10092,11 +10079,9 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
     }
 
-    var idScanSmoothBox = null;   // last accepted card outline (4 corners, normalized 0..1)
+    var idScanSmoothBox = null;
     var idScanMissCount = 0;
 
-    // Finds an ID-card shaped quadrilateral (works when tilted) in a small grayscale frame.
-    // Returns {pts:[[x,y],[x,y],[x,y],[x,y]] (px, clockwise from top-left), score} or null.
     function orderQuad(pts) {
         var cx = 0, cy = 0, i;
         for (i = 0; i < 4; i++) { cx += pts[i][0] / 4; cy += pts[i][1] / 4; }
@@ -10114,11 +10099,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return t / 4;
     }
 
-    // "prior" (optional) = where the card is expected, 4 corners in px of this frame.
-    // With a prior the detector only considers outlines near it and snaps it onto the real edges.
     function detectCardQuad(gray, w, h, prior) {
         var x, y, i, k;
-        // --- blur (two 3x3 box passes ~ gaussian) ---
         function box3(src) {
             var out = new Float32Array(w * h);
             for (var yy = 1; yy < h - 1; yy++) {
@@ -10133,9 +10115,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
         var bl = box3(box3(gray));
 
-        // --- gradients ---
         var mag = new Float32Array(w * h);
-        var ang = new Float32Array(w * h);   // gradient direction folded to [0, PI)
+        var ang = new Float32Array(w * h);
         var hist = new Int32Array(256);
         var maxMag = 0;
         for (y = 4; y < h - 4; y++) {
@@ -10158,7 +10139,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         var scale = 255 / maxMag;
         var total = 0;
         for (i = 0; i < mag.length; i++) { hist[Math.min(255, (mag[i] * scale) | 0)]++; total++; }
-        // keep the strongest ~10% of pixels as "edges"
         var acc = 0, cut = 255;
         for (k = 255; k >= 0; k--) { acc += hist[k]; if (acc > total * 0.14) { cut = k; break; } }
         var thr = Math.max(5, cut / scale);
@@ -10170,8 +10150,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
         if (edgeList.length < 60) return null;
 
-        // --- Hough transform over line normals ---
-        var NT = 90;                                   // 2 degree bins
+        var NT = 90;
         var diag = Math.ceil(Math.sqrt(w * w + h * h));
         var NR = diag * 2 + 1;
         var acc2 = new Float32Array(NT * NR);
@@ -10200,7 +10179,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             }
         }
         acc2 = accS;
-        // --- pick peaks (non-max suppression) ---
         function lineDist(a, b) {
             var dtheta = Math.abs(a.t - b.t), r2 = b.r;
             if (dtheta > NT / 2) { dtheta = NT - dtheta; r2 = -b.r; }
@@ -10214,13 +10192,11 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             }
         }
         cand.sort(function (a, b) { return b.v - a.v; });
-        // pick peaks separately for near-horizontal and near-vertical lines,
-        // so strong lines in one direction can't hide weaker ones in the other
         var lines = [];
         for (var grp = 0; grp < 2; grp++) {
             var gl = [], gmax = 0;
             for (var c = 0; c < cand.length; c++) {
-                var isHoriz = (cand[c].t >= NT / 4 && cand[c].t <= NT * 3 / 4);   // gradient ~vertical => horizontal line
+                var isHoriz = (cand[c].t >= NT / 4 && cand[c].t <= NT * 3 / 4);
                 if ((grp === 0) !== isHoriz) continue;
                 if (!gmax) gmax = cand[c].v;
                 if (cand[c].v < gmax * 0.12 || gl.length >= 8) break;
@@ -10243,7 +10219,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             return [(a.r * s2 - b.r * s1) / det, (b.r * c1 - a.r * c2) / det];
         }
 
-        // --- parallel pairs ---
         var pairs = [];
         for (var p = 0; p < lines.length; p++) {
             for (var q = p + 1; q < lines.length; q++) {
@@ -10254,7 +10229,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             }
         }
 
-        // slide each side a few pixels to the strongest nearby edge, then re-intersect
         function refineQuad(pts, range) {
             var lns = [];
             for (var q2 = 0; q2 < 4; q2++) {
@@ -10274,7 +10248,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                         if (da > Math.PI / 2) da = Math.PI - da;
                         if (da < 0.5) sumM += mag[qi];
                     }
-                    sumM -= Math.abs(o) * 0.02 * sumM;            // slight preference for staying put
+                    sumM -= Math.abs(o) * 0.02 * sumM;
                     if (sumM > bestSum) { bestSum = sumM; bestO = o; }
                 }
                 lns.push({ x: p1[0] + nx * bestO, y: p1[1] + ny * bestO, dx: dx, dy: dy });
@@ -10290,12 +10264,11 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             return out;
         }
 
-        // support of a side: fraction of sampled points with an aligned edge nearby
         function sideSupport(p1, p2) {
             var dx = p2[0] - p1[0], dy = p2[1] - p1[1];
             var len = Math.sqrt(dx * dx + dy * dy);
             if (len < 8) return 0;
-            var sideAng = Math.atan2(dy, dx) + Math.PI / 2;      // normal of the side
+            var sideAng = Math.atan2(dy, dx) + Math.PI / 2;
             sideAng = ((sideAng % Math.PI) + Math.PI) % Math.PI;
             var steps = Math.max(12, Math.min(40, Math.round(len / 3)));
             var hit = 0, valid = 0;
@@ -10316,7 +10289,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                 }
                 if (found) hit++;
             }
-            if (valid < steps * 0.5) return 0;   // mostly outside the frame
+            if (valid < steps * 0.5) return 0;
             return hit / valid;
         }
 
@@ -10325,7 +10298,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
         function dist(u, v2) { return Math.sqrt((u[0] - v2[0]) * (u[0] - v2[0]) + (u[1] - v2[1]) * (u[1] - v2[1])); }
 
-        // scores one candidate made of two parallel lines (A0,A1) and two other lines (B0,B1)
         function evalQuad(A0, A1, B0, B1, virtualSide) {
             var perp = angDiffBins(A0, B0) * 180 / NT;
             if (perp < 84 || perp > 96) return;
@@ -10353,11 +10325,9 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             var val;
             var dev = Math.abs(asp - 1.586) / 1.586;
             if (virtualSide) {
-                // one side was inferred from the ID proportions: the 3 real sides must be strong
                 var sorted = sup.slice().sort(function (p1, p2) { return p1 - p2; });
                 var real3 = (sorted[1] + sorted[2] + sorted[3]) / 3;
                 if (sorted[1] < 0.4 || real3 < 0.5) return;
-                // the inferred side should still have SOME edge evidence; penalize pure guesses
                 var guessFactor = 0.45 + 0.55 * Math.min(1, sorted[0] / 0.35);
                 val = real3 * Math.pow(af, 1.5) * 0.85 * guessFactor * (1 - Math.min(0.4, dev * 0.6));
                 meanS = real3;
@@ -10381,7 +10351,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                 evalQuad(pairs[a][0], pairs[a][1], pairs[b][0], pairs[b][1], false);
             }
         }
-        // 3 clear sides + 1 washed-out side: infer the 4th from the ID proportions (about 1.586 : 1)
         for (a = 0; a < pairs.length; a++) {
             var gap = lineDist(pairs[a][0], pairs[a][1]).dr;
             for (var li = 0; li < lines.length; li++) {
@@ -10401,7 +10370,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
         if (best) best.pts = refineQuad(best.pts, 3);
         if (prior) {
-            // nothing new found: snap the expected outline onto the nearest real edges
             var rp = refineQuad(prior, 4);
             var sp = (sideSupport(rp[0], rp[1]) + sideSupport(rp[1], rp[2]) +
                       sideSupport(rp[2], rp[3]) + sideSupport(rp[3], rp[0])) / 4;
@@ -10414,7 +10382,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     var idScanCaps = null;
     var idScanLastFocusAt = 0;
 
-    // continuous autofocus where the device supports it (mostly phones)
     function setupIdCameraFocus(stream) {
         idScanTrack = null;
         idScanCaps = null;
@@ -10427,7 +10394,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         } catch (e) {}
     }
 
-    // ask the camera to focus on the spot where the ID was found (if supported)
     function focusCameraOnPoint(nx, ny) {
         var now = Date.now();
         if (!idScanTrack || !idScanCaps || now - idScanLastFocusAt < 1500) return;
@@ -10448,9 +10414,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         } catch (e) {}
     }
 
-    // ---- tracking outline (SVG polygon that follows the ID, smoothed every animation frame) ----
-    var idScanQuadTarget = null;    // 4 corners, normalized 0..1 of the video frame (latest detection)
-    var idScanQuadShown = null;     // 4 corners currently drawn
+    var idScanQuadTarget = null;
+    var idScanQuadShown = null;
     var idScanQuadRaf = null;
     var idScanJumpCount = 0;
 
@@ -10485,7 +10450,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         var cw = wrap.clientWidth, ch = wrap.clientHeight;
         var vw = video.videoWidth, vh = video.videoHeight;
         if (cw && ch && vw && vh) {
-            // same mapping as object-fit: cover
             var scale = Math.max(cw / vw, ch / vh);
             var ox = (cw - vw * scale) / 2, oy = (ch - vh * scale) / 2;
             var pts = idScanQuadShown.map(function (p) { return [p[0] * vw * scale + ox, p[1] * vh * scale + oy]; });
@@ -10541,7 +10505,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return Math.abs(a) / 2;
     }
 
-    // distance between two outlines, as a fraction of the frame diagonal
     function quadDist(a, b) {
         return quadMeanDist(a, b) / 1.25;
     }
@@ -10559,15 +10522,14 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return ar > 0.04 && ar < 0.97;
     }
 
-    // ---- AI locator (backend /api/detect-id, Gemini) ----
     var idScanSessionId = 0;
     var idAiEnabled = true;
     var idAiBusy = false;
     var idAiFails = 0;
     var idAiResponded = false;
     var idAiNoneCount = 0;
-    var idAiLast = null;            // {q, t} newest accepted AI outline
-    var idAiPending = null;         // AI outline not merged into the tracker yet
+    var idAiLast = null;
+    var idAiPending = null;
     var idAiConfirmedAt = 0;
     var idAiLastReqAt = 0;
     var idAiCanvas = document.createElement("canvas");
@@ -10607,7 +10569,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }).then(function (d) {
             clearTimeout(timer);
             idAiBusy = false;
-            if (session !== idScanSessionId) return;     // scanner was closed / restarted
+            if (session !== idScanSessionId) return;
             if (d && d.error) throw new Error(d.error);
             idAiFails = 0;
             idAiResponded = true;
@@ -10617,7 +10579,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             idAiBusy = false;
             if (session !== idScanSessionId) return;
             idAiFails++;
-            if (idAiFails >= 3) idAiEnabled = false;      // backend not reachable: fall back to on-device tracking only
+            if (idAiFails >= 3) idAiEnabled = false;
         });
     }
 
@@ -10642,7 +10604,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         var video = document.getElementById("idScanVideo");
         if (!video.videoWidth) return;
 
-        // small copy of the frame, same aspect as the video
         var w = 192;
         var h = Math.max(72, Math.round(w * video.videoHeight / video.videoWidth));
         idScanAutoCanvas.width = w;
@@ -10672,7 +10633,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
         requestAiDetect(video);
 
-        // the AI said twice in a row that there is no ID: don't show any outline
         if (idAiEnabled && idAiResponded && idAiNoneCount >= 2) {
             idScanSmoothBox = null;
             idScanStableCount = 0;
@@ -10683,7 +10643,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             return;
         }
 
-        // merge a fresh AI outline: it decides WHICH object is the ID
         if (idAiPending) {
             var aq = idAiPending;
             idAiPending = null;
@@ -10695,7 +10654,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             idScanMissCount = 0;
         }
 
-        // on-device edge tracker: snaps the outline onto the real card edges, frame by frame
         var prior = idScanSmoothBox ?
             idScanSmoothBox.map(function (pt) { return [pt[0] * w, pt[1] * h]; }) : null;
         var det = detectCardQuad(gray, w, h, prior);
@@ -10710,10 +10668,10 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             } else {
                 var dmove = quadDist(idScanSmoothBox, nq);
                 if (dmove > 0.15) {
-                    idScanMissCount++;              // implausible jump: ignore this frame
+                    idScanMissCount++;
                 } else {
                     idScanMissCount = 0;
-                    if (dmove > 0.004) {            // dead-band: tiny changes are noise
+                    if (dmove > 0.004) {
                         for (var k = 0; k < 4; k++) {
                             idScanSmoothBox[k][0] += (nq[k][0] - idScanSmoothBox[k][0]) * 0.4;
                             idScanSmoothBox[k][1] += (nq[k][1] - idScanSmoothBox[k][1]) * 0.4;
@@ -10735,7 +10693,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             return;
         }
 
-        // lost the card for a while and the AI hasn't seen it recently either
         var aiFresh = idAiLast && (now - idAiLast.t) < 3000;
         if (idScanMissCount > 10 && !aiFresh) {
             idScanSmoothBox = null;
@@ -10776,7 +10733,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
         idScanStableCount++;
 
-        // when the AI is available it must agree with the outline before we capture
         var needAi = idAiEnabled && idAiResponded;
         var aiAgrees = !needAi || (idAiLast && (now - idAiConfirmedAt) < 2800 && quadDist(q, idAiLast.q) < 0.07);
 
@@ -11576,10 +11532,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         reader.readAsDataURL(file);
     }
 
-    // =====================================================================
-    // Front page slideshow (public) + owner-only editor
-    // Cloud layout: cvspee/homeSlides {interval}  +  cvspee/homeSlides/items/{id} (one doc per slide)
-    // =====================================================================
     var HOME_DEFAULT_INTERVAL = 6;
     var HOME_MAX_SLIDES = 8;
     var HOME_DEFAULT_SLIDE = {
@@ -11630,7 +11582,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return hsLuma(bg) > 150 ? "#1a1a1a" : "#ffffff";
     }
 
-    // only allow data:image, http(s) and plain relative paths (never javascript: etc.)
     function hsSafeSrc(src) {
         src = String(src || "").trim();
         if (!src) return "";
@@ -11671,7 +11622,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return !!(page && page.classList.contains("active"));
     }
 
-    // ---- build one slide element (used by the live slider and the editor preview) ----
     function hsBuildSlide(slide, preview) {
         var el = document.createElement("div");
         el.className = "hs-slide" + (slide.textSide === "right" ? " text-right" : "");
@@ -11755,7 +11705,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                     el.classList.remove("has-media");
                     el.classList.add("no-media");
                     box.style.display = "none";
-                    // if this broken video slide is on screen, don't get stuck on it
                     if (!preview && _hs.activeEl === el && _hs.slides.length > 1) {
                         clearTimeout(_hs.timer);
                         _hs.timer = setTimeout(hsNext, 3000);
@@ -11787,7 +11736,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return el;
     }
 
-    // ---- live slider ----
     function renderHomeSlider() {
         var host = document.getElementById("homeSlider");
         var track = document.getElementById("hsTrack");
@@ -11796,7 +11744,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         var slides = hsCurrentSlides();
         var interval = _homeCloud.interval;
         var sig = JSON.stringify(slides) + "|" + interval;
-        if (sig === _hs.sig) return;          // nothing changed: don't restart videos
+        if (sig === _hs.sig) return;
         _hs.sig = sig;
 
         var keepId = _hs.slides[_hs.index] ? _hs.slides[_hs.index].id : null;
@@ -11863,14 +11811,12 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             try { v.currentTime = 0; } catch (e) {}
             v.onended = multiple ? function () { hsNext(); } : null;
             if (multiple) {
-                // safety net in case 'ended' never fires (long videos get their full length + 15s)
                 var dur = (isFinite(v.duration) && v.duration > 0) ? v.duration * 1000 + 15000 : 10 * 60 * 1000;
                 _hs.timer = setTimeout(hsNext, dur);
             }
             var pr = v.play();
             if (pr && pr.catch) {
                 pr.catch(function () {
-                    // video can't play (autoplay blocked / wrong path): use the normal timer so the slideshow never gets stuck
                     if (_hs.activeEl !== el) return;
                     clearTimeout(_hs.timer);
                     if (multiple) _hs.timer = setTimeout(hsNext, _homeCloud.interval * 1000);
@@ -11882,7 +11828,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
     }
 
-    // draws the playing video into the small blurred canvas behind it (the ambient glow)
     function hsAmbientLoop() {
         clearTimeout(_hs.ambTimer);
         var el = _hs.activeEl;
@@ -11944,22 +11889,18 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                 _homeCloud.itemsReady = true;
                 cloudChanged();
             }, function () {
-                _homeCloud.itemsReady = true;       // can't read cloud: show the default front page
+                _homeCloud.itemsReady = true;
                 cloudChanged();
             });
         } catch (e) {
             _homeCloud.itemsReady = true;
         }
 
-        // if the cloud is slow, show the default slide rather than an empty banner
         setTimeout(function () {
             if (!_homeCloud.itemsReady) { _homeCloud.itemsReady = true; renderHomeSlider(); }
         }, 2500);
     })();
 
-    // =====================================================================
-    // Owner-only editor
-    // =====================================================================
     var _he = { slides: [], sel: 0, open: false };
 
     function heNewId() {
@@ -12211,7 +12152,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         heRenderAll();
     }
 
-    // ---- photo upload: compress in the browser, keep transparency for cut-out PNGs ----
     function hsReadFile(file) {
         return new Promise(function (resolve, reject) {
             var r = new FileReader();
@@ -12797,7 +12737,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         document.body.classList.toggle("filters-open", categoryFilterPanelOpen);
     }
 
-    // choosing a filter keeps the panel open so several can be combined; "Show N products" closes it
     function setCategoryFilter(normalizedCategory) {
         activeCategoryFilter = normalizedCategory;
         currentProductPage = 1;
@@ -12806,18 +12745,16 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
     document.addEventListener("click", function (event) {
         if (!categoryFilterPanelOpen) return;
-        // a chip that was just re-rendered is already detached from the page: ignore that click
         if (!document.body.contains(event.target)) return;
         var wrap = event.target.closest ? event.target.closest(".category-filter-wrap") : null;
         if (!wrap) toggleCategoryFilterPanel(false);
     });
 
-    // (numbers only: also safe if the page renders once before these lines have run)
     function hasNum(v) { return typeof v === "number" && isFinite(v); }
 
     var activePriceMin = null;
     var activePriceMax = null;
-    var _filterKeepPanel = false;        // true while typing a price: update numbers only, keep the inputs
+    var _filterKeepPanel = false;
 
     function formatPesoShort(n) {
         return "\u20B1" + Number(n).toLocaleString("en-PH", { maximumFractionDigits: 2 });
@@ -12830,7 +12767,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return null;
     }
 
-    // lowest / highest price a customer pays right now (discounts included)
     function catalogPriceRange() {
         var lo = null, hi = null;
         Object.keys(PRODUCTS).forEach(function (id) {
@@ -12842,7 +12778,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return { min: lo, max: hi };
     }
 
-    // quick price buttons that fit the products you actually have
     function pricePresets(range) {
         if (range.min === null || range.max - range.min < 150) return [];
         function r50(n) { return Math.round(n / 50) * 50; }
@@ -12856,7 +12791,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         ];
     }
 
-    // To add another filter later: add one more entry here (type "chips" or "range").
     function getFilterSections() {
         var seen = {};
         Object.keys(PRODUCTS).forEach(function (id) {
@@ -12903,7 +12837,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
 
         if (hasNum(activePriceMin) || hasNum(activePriceMax)) {
             var price = getDiscountedPrice(product);
-            if (!isFinite(price)) return false;          // no valid price: can't be inside a price range
+            if (!isFinite(price)) return false;
             if (hasNum(activePriceMin) && price < activePriceMin) return false;
             if (hasNum(activePriceMax) && price > activePriceMax) return false;
         }
@@ -12932,7 +12866,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         renderProductGrid();
     }
 
-    // typing in Min / Max: update the products and the numbers, but keep the text boxes (and the keyboard) untouched
     function onPriceInput() {
         var mn = parseFloat(document.getElementById("fsPriceMin").value);
         var mx = parseFloat(document.getElementById("fsPriceMax").value);
@@ -12984,7 +12917,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             active.push({ key: sec.key, label: String(label) });
         });
 
-        // how many products match right now (same rules as the grid)
         var searchInput = document.getElementById("productSearchInput");
         var query = searchInput ? searchInput.value.trim().toLowerCase() : "";
         var matchCount = Object.keys(PRODUCTS).filter(function (id) { return productPassesFilters(PRODUCTS[id], query); }).length;
@@ -12997,7 +12929,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         var existingBody = bar.querySelector ? bar.querySelector(".fs-body") : null;
 
         if (_filterKeepPanel && existingBody) {
-            // typing a price: refresh only the header, the count button and the error text
             var oldHead = bar.querySelector(".fs-head");
             if (oldHead) oldHead.outerHTML = headHtml;
             var done = bar.querySelector(".fs-done");
@@ -13055,7 +12986,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
         bar.classList.toggle("show", categoryFilterPanelOpen);
 
-        // button label + count badge
         if (labelEl) labelEl.textContent = "Filters";
         if (btnEl) {
             var badge = btnEl.querySelector(".filters-count");
@@ -13069,7 +12999,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             btnEl.classList.toggle("active", active.length > 0);
         }
 
-        // chips under the button: always shows what is applied, one tap removes it
         if (rowEl) {
             var rowHtml = active.map(function (a) {
                 return '<button type="button" class="af-chip" data-fk="' + a.key + '" title="Remove filter">' + escapeHtml(a.label) + ' <span>&times;</span></button>';
@@ -14063,12 +13992,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         });
     }
 
-    // =====================================================================
-    // Product gender + extra photos (slideshow in the product details)
-    // Extra photos live in their own document per product:
-    //   cvspee/productGallery/items/{productId}  ->  { images: [dataUrl, ...] }
-    // so they never count against the 1 MB limit of the main products document.
-    // =====================================================================
     var PRODUCT_GENDERS = ["Male", "Female", "Unisex"];
     var GALLERY_MAX_EXTRAS = 5;
     var activeGenderFilter = null;
@@ -14077,12 +14000,10 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     var editProductExtraImages = [];
     var editGalleryLoaded = false;
 
-    // (no dependency on variables defined later in the file: this runs while the page is still loading)
     function normGender(g) {
         return (g === "Male" || g === "Female" || g === "Unisex") ? g : "";
     }
 
-    // Unisex (and products where it isn't set yet) show up under both Male and Female
     function productMatchesGender(product) {
         if (!activeGenderFilter) return true;
         var g = normGender(product.gender);
@@ -14135,7 +14056,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         try { galleryRef(productId).delete().catch(function () {}); } catch (e) {}
     }
 
-    // ---- slideshow in the product details ----
     var _pdG = { images: [], index: 0, timer: null, productId: null, hover: false };
 
     function pdGalleryStop() {
@@ -14186,7 +14106,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         if (!n) return;
         _pdG.index = (i + n) % n;
         pdGalleryRender(true);
-        pdGalleryAuto();                    // restart the timer after a manual change
+        pdGalleryAuto();
     }
 
     function pdGalleryStep(dir, auto) {
@@ -14206,8 +14126,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         _pdG.index = 0;
         pdGalleryRender(false);
         loadGallery(productId, function (extras) {
-            // (note: when the photos are already cached this runs BEFORE the details window is shown,
-            //  so only check that this is still the product being opened)
             if (_pdG.productId !== productId || !extras.length) return;
             _pdG.images = [p.image].concat(extras);
             extras.forEach(function (s) { var pre = new Image(); pre.src = s; });
@@ -14239,7 +14157,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         el.style.display = "inline-block";
     }
 
-    // ---- owner: extra photos in the add / edit product forms ----
     function renderExtraThumbs(prefix) {
         var list = prefix === "new" ? newProductExtraImages : editProductExtraImages;
         var box = document.getElementById(prefix + "ProductExtraThumbs");
@@ -14296,15 +14213,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     }
 
 
-    // =====================================================================
-    // Size chart: shown right away in the product details.
-    //  - ready-made charts (T-shirt & shorts, shoes) are picked AUTOMATICALLY from the product's
-    //    category / name, so every new product gets one without the owner doing anything
-    //  - the owner can force one, turn it off, or type a custom chart
-    // product.sizeChartMode: "auto" (default) | "tshirt" | "shoes" | "none" | "custom"
-    // product.sizeChart: only used by "custom"  ->  { headers: [...], rows: [ { c: [...] } ], note }
-    //   (rows are objects because Firestore does not allow an array directly inside an array)
-    // =====================================================================
     var SIZE_CHART_PRESETS = {
         tshirt: {
             label: "T-Shirt & Shorts (Unisex)",
@@ -14370,8 +14278,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     };
 
 
-    // More ready-made charts. They are a standard size guide (approximate), so each one shows a note.
-    // Waist ranges and the foot lengths follow the two charts supplied by the shop.
     SIZE_CHART_PRESETS.polo = {
         label: "Polo / Blouse (Uniform)",
         title: "Polo & Blouse Size Chart (Uniform)",
@@ -14464,7 +14370,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         note: "Standard size guide. Measurements are approximate and may vary by about 1 inch."
     };
 
-    // foot lengths and EU sizes come from the shoe chart above
     SIZE_CHART_PRESETS.socks = {
         label: "Socks",
         title: "Socks Size Chart",
@@ -14496,10 +14401,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     var SIZECHART_MAX_CELL = 24;
     var SIZECHART_EXAMPLE = "Size, Chest (in), Length (in)\nS, 36, 26\nM, 38, 27\nL, 40, 28\nXL, 42, 29";
 
-    // which ready-made chart fits this product?  returns "shoes", "socks", "pants", "skirt", "tshirt",
-    // "jacket", "polo" or "" (none).  The product NAME is checked first (most specific), then the category.
     function detectSizeChartKind(name, category, sizes) {
-        // accessories / items with no size ("One Size") never need a chart
         if (Array.isArray(sizes) && sizes.length === 1 && /one\s*size/i.test(String(sizes[0]))) return "";
         var n = String(name || "").toLowerCase();
         var all = (String(category || "") + " " + n).toLowerCase();
@@ -14521,7 +14423,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         });
     }
 
-    // what chart should this product show?  { title, tables:[{tab,title,headers,rows:[[..]]}], note } or null
     function resolveSizeChart(product) {
         if (!product) return null;
         var mode = product.sizeChartMode || "auto";
@@ -14568,7 +14469,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return wrap;
     }
 
-    // draws a chart (with tabs when it has more than one table) into `box`
     function renderSizeChartInto(box, chart, preferredTab, showHeading) {
         box.innerHTML = "";
         if (!chart) return;
@@ -14624,22 +14524,18 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         }
     }
 
-    // product details: the chart is visible as soon as the product opens
     function pdRenderSizeChart(product) {
         var box = document.getElementById("pdSizeChart");
         if (!box) return;
         var chart = resolveSizeChart(product);
         if (!chart) { box.innerHTML = ""; box.style.display = "none"; return; }
 
-        // shoes: open the Women's table first for women's products
         var tab = 0;
         if ((chart.kind === "shoes" || chart.kind === "polo") && product.gender === "Female") tab = 1;
         renderSizeChartInto(box, chart, tab, true);
         box.style.display = "";
     }
 
-    // ---- custom chart typed by the owner ----
-    // text -> { chart, error }.  Empty text = no chart.
     function parseSizeChartText(text, note) {
         var lines = String(text || "").split(/\r?\n/).map(function (l) { return l.trim(); }).filter(function (l) { return l !== ""; });
         if (!lines.length) return { chart: null, error: "" };
@@ -14672,12 +14568,10 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return out.join("\n");
     }
 
-    // ---- owner forms (Add / Edit product) ----
     function sizeChartModeOf(which) {
         return document.getElementById(which + "SizeChartMode").value || "auto";
     }
 
-    // shows what the chart will be, and the custom editor only when "Custom" is picked
     function sizeChartFormUpdate(which) {
         var mode = sizeChartModeOf(which);
         document.getElementById(which + "SizeChartCustom").style.display = (mode === "custom") ? "" : "none";
@@ -14751,7 +14645,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         sizeChartFormUpdate(which);
     }
 
-    // -> { mode, chart (custom only), error }
     function readSizeChartFromForm(which) {
         var mode = sizeChartModeOf(which);
         if (mode !== "custom") return { mode: mode, chart: null, error: "" };
@@ -14764,7 +14657,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return { mode: mode, chart: res.chart, error: "" };
     }
 
-    // Size Guide page: every ready-made chart in one place
     function renderSizeGuidePage() {
         var host = document.getElementById("sizeGuideCharts");
         if (!host) return;
@@ -15683,9 +15575,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     
     
     var chatHistory = [];
-    var PRODUCT_CHAT_ENDPOINT = "https://cvspee-production.up.railway.app/api/product-chat";
+    var PRODUCT_CHAT_ENDPOINT = BACKEND_URL + "/api/product-chat";
 
-    // the product's size chart as plain text, so the AI can answer questions about it
     function sizeChartTextForAI(product) {
         var chart = resolveSizeChart(product);
         if (!chart) return "";
@@ -15700,7 +15591,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return out.join("\n").slice(0, 4000);
     }
 
-    // shows the size chart table as a message in the chat; returns false if the product has none
     function appendSizeChartToChat() {
         var product = PRODUCTS[chatState.productId];
         var chart = product ? resolveSizeChart(product) : null;
@@ -15718,7 +15608,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         return true;
     }
 
-    // the "Size chart" button in the chat
     function handleSizeChartChoice() {
         var product = PRODUCTS[chatState.productId];
         if (!product) return;
@@ -15782,7 +15671,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                     appendSizeChartToChat();
                 }
 
-                // the AI picked or CHANGED the size (the size buttons update to match)
                 if (data && data.size && product.sizes.indexOf(data.size) !== -1) {
                     chatSelectSize(data.size);
                 }
@@ -15809,7 +15697,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     
     
     
-    var SUPPORT_CHAT_ENDPOINT = "https://cvspee-production.up.railway.app/api/support-chat";
+    var SUPPORT_CHAT_ENDPOINT = BACKEND_URL + "/api/support-chat";
     var supportChatHistory = [];
     var supportChatStarted = false;
 
@@ -15897,7 +15785,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         chatState.size = size;
         document.getElementById("chatContinueBtn").disabled = false;
 
-        // keep the size buttons visible (the chosen one highlighted) so the size can still be changed
         var product = PRODUCTS[chatState.productId];
         if (product && product.sizes && product.sizes.length > 1) showChatSizeChoices();
     }
@@ -15946,7 +15833,7 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
                 ? "Great! " + product.name + " in size " + chatState.size + " is all set. Tap Continue below whenever you're ready."
                 : "Great! " + product.name + " is all set. Tap Continue below whenever you're ready.";
             addChatMessage("ai", confirmMsg);
-            if (product.sizes && product.sizes.length > 1) showChatSizeChoices();   // still changeable
+            if (product.sizes && product.sizes.length > 1) showChatSizeChoices();
             return;
         }
 
@@ -15954,7 +15841,6 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         showChatSizeChoices();
     }
 
-    // the size buttons: the chosen size is highlighted and any button can be tapped to change it
     function showChatSizeChoices() {
         var product = PRODUCTS[chatState.productId];
         if (!product || !product.sizes) return;
@@ -15977,10 +15863,10 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         if (!product) return;
 
         var previous = chatState.size;
-        if (previous === size) return;                    // already selected: nothing to change
+        if (previous === size) return;
 
         addChatMessage("user", size);
-        chatSelectSize(size);                             // also refreshes the highlighted button
+        chatSelectSize(size);
 
         if (previous) {
             addChatMessage("ai", "Okay — changed your size from " + previous + " to " + size + " for " + product.name + ". Tap Continue below whenever you're ready, or change it again anytime.");
