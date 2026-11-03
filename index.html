@@ -7054,7 +7054,13 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
     border-color: #333;
 }
 
-.site-navbar .logo .logo-tagline { display: none !important; }
+.site-navbar .logo .logo-tagline {
+    display: block !important;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
 .site-navbar .logo img {
     height: 70px !important;
     width: auto !important;
@@ -7069,8 +7075,13 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
         height: auto !important;
         width: auto !important;
         max-width: 100% !important;
-        max-height: 44px !important;
+        max-height: 48px !important;
         object-fit: contain;
+    }
+    .site-navbar .logo .logo-tagline {
+        font-size: 8px;
+        white-space: normal;
+        max-width: 100%;
     }
 }
 </style>
@@ -8190,7 +8201,8 @@ body.dark-mode .chat-bubble.chat-bubble-chart {
             </button>
 
             <div class="logo">
-                <img src="images/logo.png?v=2" alt="CVSPEE">
+                <img src="images/logo.png?v=3" alt="CVSPEE">
+                <span class="logo-tagline">Cavite State University - Campus Shop</span>
             </div>
 
             <nav>
