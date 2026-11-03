@@ -9497,6 +9497,9 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         var snowP = [], rockets = [], sparks = [], confetti = [], nextRocket = 0, timers = [];
         var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
         var soundOn = false, ac = null, master = null, sess = null, nbuf = null, nodes = [];
+        /* Real audio files (put them in the "sounds" folder). If a file is missing, the built-in synth sound is used. */
+        var FILES = { halloween: "sounds/halloween.mp3", christmas: "sounds/christmas.mp3", newyear: "sounds/newyear.mp3" };
+        var aud = null, usingFile = false;
         try { soundOn = localStorage.getItem("cvspee_event_sound") === "1"; } catch (e) {}
 
         /* ---------- sound (synthesized, no files) ---------- */
@@ -9532,22 +9535,71 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
             g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
             s.connect(fl); fl.connect(g); g.connect(sess); s.start(t, Math.random()); s.stop(t + dur + 0.05);
         }
-        function soundHallo() {
-            [55, 58.3].forEach(function (f) {
-                var o = ac.createOscillator(), l = ac.createBiquadFilter(), g = ac.createGain();
-                o.type = "sawtooth"; o.frequency.value = f; l.type = "lowpass"; l.frequency.value = 150; g.gain.value = 0.05;
-                o.connect(l); l.connect(g); g.connect(sess); o.start(); nodes.push(o);
+        function mf(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+        function organ(f, t, d, vol) {
+            var g = ac.createGain(), l = ac.createBiquadFilter();
+            l.type = "lowpass"; l.frequency.value = 1400;
+            g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.04);
+            g.gain.setValueAtTime(vol, t + Math.max(d - 0.08, 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.12);
+            l.connect(g); g.connect(sess);
+            [[f, "sawtooth", 1], [f * 2, "square", 0.4], [f / 2, "sawtooth", 0.6]].forEach(function (x) {
+                var o = ac.createOscillator(), og = ac.createGain();
+                o.type = x[1]; o.frequency.value = x[0]; og.gain.value = x[2];
+                o.connect(og); og.connect(l); o.start(t); o.stop(t + d + 0.2); nodes.push(o);
             });
-            var w = ac.createBufferSource(), wf = ac.createBiquadFilter(), wg = ac.createGain();
-            w.buffer = noiseBuf(); w.loop = true; wf.type = "bandpass"; wf.frequency.value = 420; wg.gain.value = 0.025;
-            w.connect(wf); wf.connect(wg); wg.connect(sess); w.start(); nodes.push(w);
-            (function ev() {
-                var t = ac.currentTime + 0.05, r = Math.random();
-                if (r < 0.4) { tone(420, t, 1.8, "sine", 0.07, 240); tone(426, t, 1.8, "sine", 0.05, 236); }
-                else if (r < 0.75) { for (var i = 0; i < 3; i++) tone(3000 + i * 500, t + i * 0.12, 0.08, "triangle", 0.03, 4800); }
-                else { tone(80, t, 0.9, "sawtooth", 0.04, 170); noise(t, 0.6, "bandpass", 300, 0.04); }
-                timers.push(setTimeout(ev, 4000 + Math.random() * 5000));
-            })();
+        }
+        function soundHallo() {
+            /* Intro: Bach "Toccata" motif on organ (public domain), then an original spooky waltz in A minor */
+            var t0 = ac.currentTime + 0.2, t = t0;
+            function intro(base, k) {
+                [[69, 0.13], [67, 0.13], [69, 1.1], [0, 0.45], [67, 0.24], [65, 0.24], [64, 0.24], [62, 0.24], [61, 0.4], [62, 2.0]].forEach(function (n) {
+                    if (n[0]) { organ(mf(n[0] + base), t, n[1], 0.05); if (k) organ(mf(n[0] + base - 12), t, n[1], 0.04); }
+                    t += n[1];
+                });
+            }
+            intro(0, 0); t += 0.4; intro(-12, 1); t += 1.2;
+            var beat = 0.42, chords = ["Am", "Am", "Dm", "E", "Dm", "E", "Am", "Am"];
+            var CH = { Am: [45, [57, 60, 64]], Dm: [50, [62, 65, 69]], E: [52, [64, 68, 71]] };
+            var mel = [[[69,1],[72,1],[76,1]], [[81,2],[76,1]], [[77,1],[76,1],[74,1]], [[76,3]],
+                       [[74,1],[77,1],[81,1]], [[80,1],[76,1],[71,1]], [[72,1],[71,1],[69,1]], [[69,3]]];
+            for (var rep = 0; rep < 2; rep++) {
+                for (var b = 0; b < 8; b++) {
+                    var bt = t, c = CH[chords[b]];
+                    tone(mf(c[0]), bt, beat * 1.6, "triangle", 0.16);
+                    [1, 2].forEach(function (i) { c[1].forEach(function (m) { tone(mf(m), bt + i * beat, beat * 0.9, "triangle", 0.035); }); });
+                    mel[b].forEach(function (n) {
+                        tone(mf(n[0]), bt, n[1] * beat + 0.5, "triangle", 0.09);
+                        tone(mf(n[0]) * 2, bt, 0.4, "sine", 0.03);
+                        bt += n[1] * beat;
+                    });
+                    t += beat * 3;
+                }
+            }
+            timers.push(setTimeout(soundHallo, (t - ac.currentTime + 3) * 1000));
+        }
+        function soundNewYear() {
+            /* "Auld Lang Syne" (traditional, public domain) with soft chords */
+            var beat = 0.62, t = ac.currentTime + 0.3;
+            var mel = [[67,1],
+                [72,1.5],[72,0.5],[72,1],[76,1], [74,1.5],[72,0.5],[74,1],[76,1], [72,1.5],[72,0.5],[76,1],[79,1], [81,4],
+                [81,1],
+                [79,1.5],[76,0.5],[76,1],[72,1], [74,1.5],[72,0.5],[74,1],[76,1], [72,1.5],[69,0.5],[69,1],[67,1], [72,4]];
+            var CH = { C: [48, [60, 64, 67]], G: [43, [59, 62, 67]], F: [41, [57, 60, 65]] };
+            var prog = ["C", "G", "C", "F", "C", "G", "F", "C"];
+            var start = t + beat;
+            prog.forEach(function (p, i) {
+                var bt = start + i * beat * 4, c = CH[p];
+                tone(mf(c[0]), bt, beat * 2, "triangle", 0.14);
+                tone(mf(c[0]), bt + beat * 2, beat * 2, "triangle", 0.1);
+                c[1].forEach(function (m) { tone(mf(m), bt + beat * 2, beat * 2, "sine", 0.03); });
+            });
+            mel.forEach(function (n) {
+                var d = n[1] * beat;
+                tone(mf(n[0]), t, d + 0.8, "triangle", 0.13);
+                tone(mf(n[0]) * 2, t, 0.5, "sine", 0.035);
+                t += d;
+            });
+            timers.push(setTimeout(soundNewYear, (t - ac.currentTime + 3) * 1000));
         }
         function soundXmas() {
             var F = { C: 261.63, D: 293.66, E: 329.63, F: 349.23, G: 392 };
@@ -9565,14 +9617,11 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
             }
             timers.push(setTimeout(soundXmas, (t - ac.currentTime + 3) * 1000));
         }
-        function sfxWhistle() { if (sess && theme === "newyear") tone(500, ac.currentTime, 0.7, "sine", 0.03, 2200); }
-        function sfxBoom() {
-            if (!sess || theme !== "newyear") return;
-            var t = ac.currentTime;
-            noise(t, 0.9, "lowpass", 260, 0.3); tone(90, t, 0.6, "sine", 0.3, 40);
-            for (var i = 0; i < 9; i++) noise(t + 0.12 + Math.random() * 0.6, 0.05, "highpass", 4000, 0.05);
-        }
+        function sfxWhistle() {}
+        function sfxBoom() {}
         function stopSound() {
+            if (aud) { try { aud.pause(); } catch (e) {} aud = null; }
+            usingFile = false;
             timers.forEach(clearTimeout); timers = [];
             nodes.forEach(function (n) { try { n.stop(); } catch (e) {} }); nodes = [];
             if (sess && ac) {
@@ -9585,9 +9634,24 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
             if (!soundOn || theme === "default" || !A()) return;
             stopSound();
             sess = ac.createGain(); sess.gain.value = 1; sess.connect(master);
+            var src = FILES[theme];
+            if (src) { playFile(src); return; }
+            synth();
+        }
+        function synth() {
+            if (!sess) return;
             if (theme === "halloween") soundHallo();
             else if (theme === "christmas") soundXmas();
-            else if (theme === "newyear") [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { tone(f, ac.currentTime + i * 0.12, 0.7, "triangle", 0.06); });
+            else if (theme === "newyear") soundNewYear();
+        }
+        function playFile(src) {
+            var a = new Audio(src);
+            a.loop = true; a.volume = 0.6; a.preload = "auto"; aud = a;
+            function fallback() { if (aud !== a) return; aud = null; usingFile = false; synth(); }
+            a.addEventListener("error", fallback);
+            a.addEventListener("playing", function () { if (aud === a) usingFile = true; });
+            var p = a.play();
+            if (p && p.catch) p.catch(fallback);
         }
 
         /* ---------- canvas effects ---------- */
@@ -9735,8 +9799,13 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         window.addEventListener("resize", resize);
         document.addEventListener("pointerdown", function () { if (soundOn && theme !== "default" && !sess) startSound(); }, { passive: true });
         document.addEventListener("visibilitychange", function () {
-            if (!ac) return;
-            if (document.hidden) ac.suspend(); else if (soundOn && sess) ac.resume();
+            if (document.hidden) {
+                if (aud) aud.pause();
+                if (ac) ac.suspend();
+            } else if (soundOn) {
+                if (aud) aud.play().catch(function () {});
+                if (ac && sess) ac.resume();
+            }
         });
         return { set: set };
     })();
