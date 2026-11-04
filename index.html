@@ -7154,6 +7154,39 @@ body.dark-mode .theme-picker-row select { background: #2a2a2a; color: #f0f0f0; b
 #eventSoundBtn.on { animation: none; }
 @keyframes evPulse { 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { .ev-bulb, .ev-bat, .ev-spider, .ev-fog, #eventSoundBtn { animation: none; } }
+.trk-card { background: #f6faf7; border: 1px solid #d9e8dd; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+.trk-eta { font-weight: 700; color: var(--cvsu-green); margin-bottom: 10px; }
+.trk-steps { list-style: none; margin: 0; padding: 0; }
+.trk-steps li { display: flex; gap: 10px; position: relative; padding-bottom: 14px; }
+.trk-steps li:not(:last-child)::before { content: ""; position: absolute; left: 10px; top: 22px; bottom: 0; width: 2px; background: #cfd8d2; }
+.trk-steps li.done:not(:last-child)::before { background: var(--cvsu-green); }
+.trk-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #bbb; background: #fff; flex: none; font-size: 12px; line-height: 18px; text-align: center; color: #fff; }
+.trk-steps li.done .trk-dot { background: var(--cvsu-green); border-color: var(--cvsu-green); }
+.trk-steps li.cur .trk-dot { border-color: var(--cvsu-green); animation: trkPulse 1.6s ease-in-out infinite; }
+@keyframes trkPulse { 50% { box-shadow: 0 0 0 6px rgba(11,92,46,.18); } }
+.trk-steps strong { display: block; font-size: 14px; }
+.trk-steps small, .trk-note, .trk-staff small { color: #777; font-size: 12px; }
+#trkMap { height: 210px; border-radius: 10px; margin-top: 4px; z-index: 0; }
+.trk-note { margin: 6px 0 0; font-weight: 600; color: var(--cvsu-green); }
+.trk-rider { background: #fff; border: 2px solid var(--cvsu-green); border-radius: 50%; font-size: 19px; text-align: center; line-height: 30px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+.trk-dest { font-size: 28px; line-height: 30px; background: none; border: none; }
+.trk-staff { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cfd8d2; display: flex; flex-direction: column; gap: 8px; }
+.trk-staff label { font-size: 13px; font-weight: 600; }
+.trk-row { display: flex; gap: 8px; }
+.trk-row input { flex: 1; font: inherit; padding: 7px 8px; border: 1px solid #cfcfcf; border-radius: 8px; }
+.trk-row button, .trk-share { font: inherit; font-weight: 600; padding: 8px 14px; border: none; border-radius: 8px; background: var(--cvsu-green); color: #fff; cursor: pointer; }
+.trk-share.on { background: #c0392b; }
+.order-row-eta { font-size: 12px; color: var(--cvsu-green); font-weight: 600; margin: 4px 0; }
+body.dark-mode .trk-card { background: #1e1e1e; border-color: #333; }
+body.dark-mode .trk-eta, body.dark-mode .trk-note, body.dark-mode .order-row-eta { color: #66bb6a; }
+body.dark-mode .trk-dot { background: #2a2a2a; border-color: #555; }
+body.dark-mode .trk-row input { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
+#trkMap { height: 230px; border-radius: 10px; margin: 4px 0 8px; z-index: 0; }
+.trk-pin { background: none; border: none; font-size: 26px; line-height: 28px; text-align: center; }
+.trk-shop { font-size: 20px; }
+.trk-van { background: none; border: none; transition: transform 1.5s linear; }
+.trk-van-in { filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+.leaflet-tooltip.trk-tip { background: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; padding: 5px 10px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
 </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -8007,6 +8040,8 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
             </div>
         </div>
 
+        <div id="orderTrackCard"></div>
+
         <div class="order-action-details" id="orderActionDetails"></div>
 
         <div class="order-action-buttons" id="orderActionButtons"></div>
@@ -8335,7 +8370,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         <li><a href="#data-privacy">Data Privacy Notice</a></li>
         <li><a href="#how-to-order">How to Order</a></li>
         <li><a href="#size-guide">Size Guide</a></li>
-        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvspeeshop.github.io/Panel/" target="_blank" rel="noopener">Admin/Seller Panel</a></li>
+        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvsupee.github.io/Panel/" target="_blank" rel="noopener">Admin/Seller Panel</a></li>
         <li id="promoManagerMenuItem" style="display:none;"><a href="#" onclick="closeSideMenu(); openPromoManager(); return false;">Promo Codes</a></li>
     </ul>
 
@@ -16712,6 +16747,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                 method: selectedPaymentMethod,
                 details: extraDetails,
                 date: new Date().toLocaleString(),
+                createdAt: Date.now(),
                 status: "pending",
                 messages: [],
                 ownerUnread: 0,
@@ -17256,6 +17292,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                         '<span class="order-status order-status-' + o.status + '">' + statusLabel + '</span>' +
                     '</div>' +
                     '<div class="order-row-items">' + escapeHtml(orderSummaryText(o)) + '</div>' +
+                    '<div class="order-row-eta">\uD83D\uDE9A ' + escapeHtml(orderEtaText(o)) + '</div>' +
                     '<div class="order-row-footer">' +
                         '<div class="order-row-buyer">' + escapeHtml(o.date) + '</div>' +
                     '</div>' +
@@ -17717,6 +17754,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
     }
 
     function closeOrderAction() {
+        trackCleanup();
         document.getElementById("orderActionOverlay").classList.remove("show");
         currentOrderActionId = null;
     }
@@ -17801,6 +17839,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         detailsHtml += '<strong>Date:</strong> ' + escapeHtml(order.date);
 
         document.getElementById("orderActionDetails").innerHTML = detailsHtml;
+        renderTrackCard(order);
 
         var buttonsEl = document.getElementById("orderActionButtons");
         var chatSection = document.getElementById("orderChatSection");
@@ -17818,6 +17857,166 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         }
     }
 
+    /* ===== Estimated parcel tracking on a map (no live GPS) ===== */
+    /* Starting point of the parcel. Change this to your shop's real pickup location. */
+    var SHOP_LOC = { lat: 14.4837, lng: 120.899 };
+
+    function rtDay(ts) { return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
+    function rtDT(ts) { return new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
+    function orderEtaEnd(o) {
+        if (o.eta) return o.eta;
+        var b = o.confirmedAt || o.createdAt || Date.parse(o.date);
+        return b ? b + 2 * 86400000 : 0;
+    }
+    function orderEtaText(o) {
+        if (!o || o.status === "cancelled") return "";
+        if (o.status === "pending") return "Waiting for seller confirmation";
+        if (o.status === "delivered") return o.deliveredAt ? "Delivered on " + rtDT(o.deliveredAt) : "Delivered";
+        if (o.eta) return "Estimated arrival: " + rtDT(o.eta);
+        var b = o.confirmedAt || o.createdAt || Date.parse(o.date);
+        if (!b) return "";
+        return "Estimated arrival: " + rtDay(b + 86400000) + " \u2013 " + rtDay(b + 3 * 86400000);
+    }
+    function rtLeft(ms) {
+        if (ms <= 0) return "Arriving any moment";
+        var m = Math.round(ms / 60000);
+        if (m < 60) return Math.max(1, m) + " min left";
+        var h = Math.floor(m / 60);
+        if (h < 24) return h + "h " + (m % 60) + "m left";
+        return Math.floor(h / 24) + "d " + (h % 24) + "h left";
+    }
+    function rtProgress(start, end) {
+        return Math.min(0.98, Math.max(0, (Date.now() - start) / Math.max(end - start, 1)));
+    }
+    function trkMeters(a, b) {
+        var R = 6371000, rad = Math.PI / 180, dLa = (b[0] - a[0]) * rad, dLo = (b[1] - a[1]) * rad;
+        var x = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLo / 2) * Math.sin(dLo / 2);
+        return 2 * R * Math.asin(Math.sqrt(x));
+    }
+    var TRK_VAN = '<div class="trk-van-in"><svg viewBox="0 0 60 34" width="52" height="30" aria-hidden="true">' +
+        '<rect x="2" y="5" width="34" height="21" rx="3" fill="#0B5C2E"/>' +
+        '<text x="19" y="19" font-size="7" font-weight="700" fill="#FFC72C" text-anchor="middle" font-family="Arial,sans-serif">CVSPEE</text>' +
+        '<path d="M37 11h10l8 9v6H37z" fill="#FFC72C"/><path d="M41 13.5h5l4.5 5.5H41z" fill="#d7ecff"/>' +
+        '<circle cx="14" cy="28" r="5" fill="#222"/><circle cx="14" cy="28" r="2" fill="#bbb"/>' +
+        '<circle cx="46" cy="28" r="5" fill="#222"/><circle cx="46" cy="28" r="2" fill="#bbb"/></svg></div>';
+
+    var _trk = { map: null, orderId: null, order: null, coords: null, cum: null, total: 0, van: null, done: null, rest: null, timer: null };
+
+    function trkStop() {
+        if (_trk.timer) { clearInterval(_trk.timer); _trk.timer = null; }
+        if (_trk.map) { try { _trk.map.remove(); } catch (e) {} }
+        _trk.map = null; _trk.coords = null; _trk.cum = null; _trk.van = null; _trk.done = null; _trk.rest = null; _trk.total = 0;
+    }
+
+    function trackCleanup() {
+        trkStop(); _trk.orderId = null; _trk.order = null;
+        var h = document.getElementById("orderTrackCard");
+        if (h) h.innerHTML = "";
+    }
+
+    function trkPrepare(coords) {
+        _trk.coords = coords; _trk.cum = [0];
+        for (var i = 1; i < coords.length; i++) _trk.cum.push(_trk.cum[i - 1] + trkMeters(coords[i - 1], coords[i]));
+        _trk.total = _trk.cum[_trk.cum.length - 1] || 1;
+    }
+
+    function trkPointAt(p) {
+        var c = _trk.coords, cum = _trk.cum, target = p * _trk.total, i = 1;
+        while (i < c.length - 1 && cum[i] < target) i++;
+        var seg = (cum[i] - cum[i - 1]) || 1, f = Math.min(1, Math.max(0, (target - cum[i - 1]) / seg));
+        return { i: i, pt: [c[i - 1][0] + (c[i][0] - c[i - 1][0]) * f, c[i - 1][1] + (c[i][1] - c[i - 1][1]) * f], east: c[i][1] >= c[i - 1][1] };
+    }
+
+    function trkUpdate() {
+        var o = _trk.order;
+        if (!_trk.map || !_trk.coords || !o) return;
+        var start = o.confirmedAt || o.createdAt || Date.parse(o.date) || Date.now();
+        var end = orderEtaEnd(o) || start + 2 * 86400000;
+        if (end <= start) end = start + 3600000;
+        var p = rtProgress(start, end), at = trkPointAt(p);
+        _trk.van.setLatLng(at.pt);
+        var el = _trk.van.getElement();
+        if (el && el.firstChild) el.firstChild.style.transform = at.east ? "none" : "scaleX(-1)";
+        _trk.done.setLatLngs(_trk.coords.slice(0, at.i).concat([at.pt]));
+        _trk.rest.setLatLngs([at.pt].concat(_trk.coords.slice(at.i)));
+        var remM = (1 - p) * _trk.total, note = document.getElementById("trkMapNote");
+        if (note) note.textContent = rtLeft(end - Date.now()) + " \u00B7 about " + (remM < 1000 ? Math.max(10, Math.round(remM / 10) * 10) + " m" : (remM / 1000).toFixed(1) + " km") + " away (estimated)";
+    }
+
+    function trkBuildMap(order) {
+        var d = order.details || {};
+        var dest = [d.lat, d.lng];
+        var from = [order.shopLat != null ? order.shopLat : SHOP_LOC.lat, order.shopLng != null ? order.shopLng : SHOP_LOC.lng];
+        var id = order.id;
+        _trk.map = L.map("trkMap", { zoomControl: true });
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(_trk.map);
+        L.marker(dest, { icon: L.divIcon({ className: "trk-pin", html: "\uD83D\uDCCD", iconSize: [30, 30], iconAnchor: [15, 28] }) })
+            .addTo(_trk.map).bindTooltip("Your location", { direction: "top", offset: [0, -26] });
+        L.marker(from, { icon: L.divIcon({ className: "trk-pin trk-shop", html: "\uD83C\uDFEA", iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(_trk.map).bindTooltip("Seller's starting point", { direction: "top", offset: [0, -12] });
+        _trk.map.fitBounds(L.latLngBounds([from, dest]), { padding: [40, 40] });
+        function go(coords) {
+            if (!_trk.map || _trk.orderId !== id) return;
+            trkPrepare(coords);
+            _trk.rest = L.polyline(coords, { color: "#9aa5a0", weight: 5, dashArray: "2 9", lineCap: "round" }).addTo(_trk.map);
+            _trk.done = L.polyline([coords[0]], { color: "#0B5C2E", weight: 6 }).addTo(_trk.map);
+            _trk.van = L.marker(coords[0], { icon: L.divIcon({ className: "trk-van", html: TRK_VAN, iconSize: [52, 30], iconAnchor: [26, 15] }), zIndexOffset: 1000 })
+                .addTo(_trk.map).bindTooltip("Out for delivery", { permanent: true, direction: "top", offset: [0, -16], className: "trk-tip" });
+            _trk.map.fitBounds(L.latLngBounds(coords), { padding: [40, 40] });
+            trkUpdate();
+            _trk.timer = setInterval(trkUpdate, 15000);
+        }
+        var fallback = [from, dest], done = false;
+        function finish(c) { if (done) return; done = true; go(c); }
+        try {
+            var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+            var t = setTimeout(function () { if (ctl) ctl.abort(); finish(fallback); }, 7000);
+            fetch("https://router.project-osrm.org/route/v1/driving/" + from[1] + "," + from[0] + ";" + dest[1] + "," + dest[0] + "?overview=full&geometries=geojson", ctl ? { signal: ctl.signal } : {})
+                .then(function (r) { return r.json(); })
+                .then(function (j) {
+                    clearTimeout(t);
+                    var g = j && j.routes && j.routes[0] && j.routes[0].geometry && j.routes[0].geometry.coordinates;
+                    finish(g && g.length > 1 ? g.map(function (c) { return [c[1], c[0]]; }) : fallback);
+                })
+                .catch(function () { clearTimeout(t); finish(fallback); });
+        } catch (e) { finish(fallback); }
+        setTimeout(function () { if (_trk.map) _trk.map.invalidateSize(); }, 250);
+    }
+
+    function renderTrackCard(order) {
+        var host = document.getElementById("orderTrackCard");
+        if (!host) return;
+        var st = order.status;
+        if (_trk.orderId !== order.id) { trackCleanup(); _trk.orderId = order.id; }
+        _trk.order = order;
+        if (st === "cancelled") { trkStop(); host.innerHTML = '<div class="trk-card">This order was cancelled.</div>'; return; }
+        if (!document.getElementById("trkSteps")) {
+            host.innerHTML = '<div class="trk-card"><div class="trk-eta" id="trkTop"></div>' +
+                '<div id="trkMapBox" style="display:none;"><div id="trkMap"></div><p class="trk-note" id="trkMapNote"></p></div>' +
+                '<ol class="trk-steps" id="trkSteps"></ol></div>';
+        }
+        var steps = [
+            { t: "Order placed", s: "We received your order", ts: order.createdAt, done: true },
+            { t: "Order confirmed", s: "The seller accepted the order", ts: order.confirmedAt, done: st !== "pending" },
+            { t: "In transit", s: "Your parcel is on the way", done: st === "delivered" },
+            { t: "Delivered", s: "Parcel received", ts: order.deliveredAt, done: st === "delivered" }
+        ];
+        var cur = -1;
+        steps.forEach(function (x, i) { if (cur < 0 && !x.done) cur = i; });
+        document.getElementById("trkTop").textContent = st === "pending"
+            ? "\u23F3 Waiting for the seller to confirm. The estimated arrival time will show once it\u2019s confirmed."
+            : "\uD83D\uDE9A " + orderEtaText(order);
+        document.getElementById("trkSteps").innerHTML = steps.map(function (x, i) {
+            return '<li class="' + (x.done ? "done" : (i === cur ? "cur" : "")) + '"><span class="trk-dot">' + (x.done ? "\u2713" : "") + '</span>' +
+                '<div><strong>' + x.t + '</strong><small>' + (x.ts ? rtDT(x.ts) : x.s) + '</small></div></li>';
+        }).join("");
+
+        var d = order.details || {}, box = document.getElementById("trkMapBox");
+        var canMap = st === "confirmed" && d.lat != null && d.lng != null && typeof L !== "undefined";
+        if (!canMap) { trkStop(); box.style.display = "none"; return; }
+        box.style.display = "block";
+        if (!_trk.map) trkBuildMap(order); else trkUpdate();
+    }
+
     function ownerDecideOrder(newStatus) {
         var user = getCurrentUser();
         if (!user || !user.isOwner) return;
@@ -17826,7 +18025,10 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         var order = orders.find(function (o) { return o.id === currentOrderActionId; });
         if (!order) return;
 
+        if (newStatus === "confirmed" && !order.eta) { alert("Set the estimated delivery time in the Admin/Seller Panel first."); return; }
         order.status = newStatus;
+        if (newStatus === "confirmed") order.confirmedAt = Date.now();
+        if (newStatus === "delivered") order.deliveredAt = Date.now();
         order.buyerUnread = (order.buyerUnread || 0) + 1;
         saveOrdersList(orders);
 
@@ -17849,8 +18051,10 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         var orders = getOrders();
         var order = orders.find(function (o) { return o.id === currentOrderActionId; });
         if (!order || order.status !== "pending" || order.sellerEmail) return;
+        if (!order.eta) { alert("Set the estimated delivery time in the Admin/Seller Panel first."); return; }
 
         order.status = "confirmed";
+        order.confirmedAt = Date.now();
         order.sellerEmail = user.email;
         order.sellerName = user.name;
         order.sellerUnread = 0;
