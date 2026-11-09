@@ -1,12 +1,3 @@
-// CvSPEE backend — Cloudflare Worker (port of cvspee-chat-server.py)
-// Same endpoints and same JSON responses as the Flask version, so index.html
-// only needs its 3 endpoint URLs changed.
-//
-// Settings (Worker > Settings > Variables and Secrets):
-//   GEMINI_API_KEY   (Secret, required)
-//   ALLOWED_ORIGINS  (Text, optional) comma-separated, e.g. https://cvspee.web.app,https://cvspee.pages.dev
-//                    If empty, any website can call this Worker.
-//   MODEL / VISION_MODEL (Text, optional) override the default model names below.
 
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const DEFAULT_VISION_MODEL = "gemini-3.5-flash-lite";
