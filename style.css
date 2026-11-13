@@ -7168,7 +7168,12 @@ body.dark-mode .trk-row input { background: #2a2a2a; color: #f0f0f0; border-colo
 .reco-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 6500; align-items: center; justify-content: center; padding: 16px; overflow: hidden; }
 .reco-overlay.show { display: flex; }
 .reco-stage { --w: 250px; --h: 340px; position: relative; width: min(760px, 100%); height: calc(var(--h) + 30px); user-select: none; touch-action: pan-y; }
-.reco-card { position: absolute; top: 15px; left: 50%; width: var(--w); height: var(--h); margin-left: calc(var(--w) / -2); background: #fff; border: 2px solid var(--cvsu-green, #0B5C2E); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.35); transition: transform 0.45s ease, opacity 0.45s ease, filter 0.45s ease; }
+.reco-card { position: absolute; top: 15px; left: 50%; width: var(--w); height: var(--h); margin-left: calc(var(--w) / -2); background: #fff; border: 2px solid var(--cvsu-green, #0B5C2E); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.35); transition: transform 0.35s ease, opacity 0.35s ease; will-change: transform, opacity; backface-visibility: hidden; }
+.reco-card::after { content: ""; position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+.reco-card.reco-side::after { opacity: 0.12; }
+.reco-card.reco-off { visibility: hidden; }
+body.reco-open #eventDecor { visibility: hidden; }
+body.reco-open #eventDecor * { animation-play-state: paused !important; }
 .reco-card-title { background: var(--cvsu-green, #0B5C2E); color: #fff; font-family: "Merriweather", Georgia, serif; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-align: center; padding: 9px 6px; border-bottom: 3px solid var(--cvsu-gold, #C9A227); text-transform: uppercase; }
 .reco-rank { position: absolute; top: 44px; left: 8px; background: var(--cvsu-gold-bright, #FFC72C); color: #222; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 3px; z-index: 1; }
 .reco-img { width: 100%; height: 190px; object-fit: cover; display: block; background: #f1f1f1; border-bottom: 1px solid #ddd; }

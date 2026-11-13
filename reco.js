@@ -59,12 +59,13 @@
             var shift = (d === 0) ? 0 : (d > 0 ? 1 : -1) * 0.72;
             var rot = (abs === 1) ? d * 9 : 0;
             c.style.transform = abs <= 1
-                ? "translateX(calc(var(--w) * " + shift + ")) rotate(" + rot + "deg) scale(" + (abs === 0 ? 1 : 0.9) + ")"
-                : "translateX(0) scale(0.8)";
+                ? "translate3d(calc(var(--w) * " + shift + "), 0, 0) rotate(" + rot + "deg) scale(" + (abs === 0 ? 1 : 0.9) + ")"
+                : "translate3d(0, 0, 0) scale(0.8)";
             c.style.opacity = abs <= 1 ? "1" : "0";
             c.style.pointerEvents = abs <= 1 ? "auto" : "none";
             c.style.zIndex = String(10 - abs * 3);
-            c.style.filter = abs === 0 ? "none" : "brightness(0.88)";
+            c.classList.toggle("reco-side", abs === 1);
+            c.classList.toggle("reco-off", abs > 1);
         });
 
         var prevBtn = document.querySelector(".reco-prev"), nextBtn = document.querySelector(".reco-next");
@@ -102,6 +103,7 @@
     }
     function hidePopup() {
         document.getElementById("recoOverlay").classList.remove("show");
+        document.body.classList.remove("reco-open");
     }
     window.closeRecoPopup = function () {
         if (!closeReady) return;
@@ -141,12 +143,23 @@
         var els = document.querySelectorAll("#recoCards .reco-card");
         list.forEach(function (row, i) { els[i].setAttribute("data-pid", row.product.id); });
         markShown();
-        setTimeout(function () {
-            var closeBtn = document.querySelector(".reco-close");
-            closeReady = false;
-            closeBtn.classList.remove("visible");
-            document.getElementById("recoOverlay").classList.add("show");
-            setTimeout(revealClose, 5000);
-        }, 1200);
+
+        /* wait for the images to be decoded so the popup doesn't stutter while they load */
+        var imgs = Array.prototype.slice.call(document.querySelectorAll("#recoCards img"));
+        var decoded = Promise.all(imgs.map(function (im) {
+            return (im.decode ? im.decode() : Promise.resolve()).catch(function () {});
+        }));
+        var cap = new Promise(function (res) { setTimeout(res, 3000); });
+
+        Promise.race([decoded, cap]).then(function () {
+            setTimeout(function () {
+                var closeBtn = document.querySelector(".reco-close");
+                closeReady = false;
+                closeBtn.classList.remove("visible");
+                document.body.classList.add("reco-open");
+                document.getElementById("recoOverlay").classList.add("show");
+                setTimeout(revealClose, 5000);
+            }, 800);
+        });
     }, 500);
 })();

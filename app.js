@@ -9322,6 +9322,7 @@
     }
 
     function refreshOrderUI() {
+        if (document.body.classList.contains("reco-open")) return;
         updateNotifBadge();
         renderChatHeadDock();
         updateAccountIconDots();
