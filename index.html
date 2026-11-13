@@ -8370,7 +8370,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
         <li><a href="#data-privacy">Data Privacy Notice</a></li>
         <li><a href="#how-to-order">How to Order</a></li>
         <li><a href="#size-guide">Size Guide</a></li>
-        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvspeeshop.github.io/Panel/" target="_blank" rel="noopener">Admin/Seller Panel</a></li>
+        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvspeeshop.github.io/panel/" target="_blank" rel="noopener">Admin/Seller Panel</a></li>
         <li id="promoManagerMenuItem" style="display:none;"><a href="#" onclick="closeSideMenu(); openPromoManager(); return false;">Promo Codes</a></li>
     </ul>
 
@@ -18755,6 +18755,201 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
     refreshOrderUI();
     sendPresenceHeartbeat();
 
+</script>
+
+<!-- Top Sellers popup -->
+<style>
+.reco-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 6500; align-items: center; justify-content: center; padding: 16px; overflow: hidden; }
+.reco-overlay.show { display: flex; }
+.reco-stage { --w: 250px; --h: 340px; position: relative; width: min(760px, 100%); height: calc(var(--h) + 30px); user-select: none; touch-action: pan-y; }
+.reco-card { position: absolute; top: 15px; left: 50%; width: var(--w); height: var(--h); margin-left: calc(var(--w) / -2); background: #fff; border: 2px solid var(--cvsu-green, #0B5C2E); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.35); transition: transform 0.45s ease, opacity 0.45s ease, filter 0.45s ease; }
+.reco-card-title { background: var(--cvsu-green, #0B5C2E); color: #fff; font-family: "Merriweather", Georgia, serif; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-align: center; padding: 9px 6px; border-bottom: 3px solid var(--cvsu-gold, #C9A227); text-transform: uppercase; }
+.reco-rank { position: absolute; top: 44px; left: 8px; background: var(--cvsu-gold-bright, #FFC72C); color: #222; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 3px; z-index: 1; }
+.reco-img { width: 100%; height: 190px; object-fit: cover; display: block; background: #f1f1f1; border-bottom: 1px solid #ddd; }
+.reco-info { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.reco-name { font-size: 15px; font-weight: 600; color: #222; margin: 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.reco-price { font-size: 15px; color: #222; }
+.reco-sold { font-size: 12px; color: #666; }
+.reco-arrow { position: absolute; top: 50%; margin-top: -22px; z-index: 20; background: transparent; border: 0; padding: 0; cursor: pointer; width: 54px; height: 44px; }
+.reco-arrow svg { width: 100%; height: 100%; fill: #fff; stroke: var(--cvsu-green, #0B5C2E); stroke-width: 3; stroke-linejoin: round; }
+.reco-arrow:hover svg { fill: var(--cvsu-gold-bright, #FFC72C); }
+.reco-prev { left: 0; } .reco-next { right: 0; }
+.reco-close { position: absolute; z-index: 30; top: 22px; right: 28px; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; background: #b3261e; color: #fff; font-size: 30px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.reco-close { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.8s ease, visibility 0s linear 0.8s; }
+.reco-close.visible { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.8s ease; }
+.reco-close:hover { background: #8f1d17; }
+body.dark-mode .reco-card { background: #232323; border-color: #3d8f5f; }
+body.dark-mode .reco-name, body.dark-mode .reco-price { color: #eee; }
+body.dark-mode .reco-sold { color: #aaa; }
+@media (max-width: 600px) {
+  .reco-stage { --w: 215px; --h: 310px; }
+  .reco-img { height: 165px; }
+  .reco-arrow { width: 40px; height: 34px; margin-top: -17px; }
+}
+</style>
+
+<div class="reco-overlay" id="recoOverlay" onclick="if(event.target===this||event.target.id==='recoStage')closeRecoPopup()">
+  <button type="button" class="reco-close" onclick="closeRecoPopup()" aria-label="Close">&times;</button>
+  <div class="reco-stage" id="recoStage">
+    <button type="button" class="reco-arrow reco-prev" onclick="recoMove(-1)" aria-label="Previous"><svg viewBox="0 0 60 44"><polygon points="3,22 24,3 24,14 57,14 57,30 24,30 24,41"/></svg></button>
+    <div id="recoCards"></div>
+    <button type="button" class="reco-arrow reco-next" onclick="recoMove(1)" aria-label="Next"><svg viewBox="0 0 60 44"><polygon points="57,22 36,3 36,14 3,14 3,30 36,30 36,41"/></svg></button>
+  </div>
+</div>
+
+<script>
+(function () {
+    var SHOWN_KEY = "cvspeeRecoShown";
+    var cur = 0, count = 0;
+    var viewed = {};
+
+    function alreadyShown() {
+        try { return sessionStorage.getItem(SHOWN_KEY) === "1"; } catch (e) { return false; }
+    }
+    function markShown() {
+        try { sessionStorage.setItem(SHOWN_KEY, "1"); } catch (e) {}
+    }
+
+    function getTopProducts() {
+        var counts = {};
+        (_cloud.orders || []).forEach(function (o) {
+            if (!o || o.status === "cancelled" || !Array.isArray(o.items)) return;
+            o.items.forEach(function (it) {
+                if (!it || !it.id) return;
+                counts[it.id] = (counts[it.id] || 0) + (parseInt(it.qty, 10) || 1);
+            });
+        });
+        return Object.keys(counts)
+            .filter(function (id) {
+                var p = PRODUCTS[id];
+                return p && typeof p.stock === "number" && p.stock > 0;
+            })
+            .sort(function (a, b) { return counts[b] - counts[a]; })
+            .slice(0, 6)
+            .map(function (id) { return { product: PRODUCTS[id], sold: counts[id] }; });
+    }
+
+    function buildCards(list) {
+        count = list.length;
+        cur = 0;
+        viewed = {};
+        document.getElementById("recoCards").innerHTML = list.map(function (row, i) {
+            var p = row.product;
+            return '<div class="reco-card" data-i="' + i + '" onclick="recoCardClick(' + i + ')">' +
+                '<div class="reco-card-title">Most Popular Products</div>' +
+                '<span class="reco-rank">#' + (i + 1) + '</span>' +
+                '<img class="reco-img" src="' + p.image + '" alt="' + escapeHtml(p.name) + '">' +
+                '<div class="reco-info">' +
+                    '<p class="reco-name">' + escapeHtml(p.name) + '</p>' +
+                    '<div class="reco-price">' + priceDisplayHtml(p) + '</div>' +
+                    '<div class="reco-sold">' + row.sold + ' sold</div>' +
+                '</div></div>';
+        }).join("");
+        var multi = count > 1;
+        document.querySelector(".reco-prev").style.display = multi ? "" : "none";
+        document.querySelector(".reco-next").style.display = multi ? "" : "none";
+        layout();
+    }
+
+    function layout() {
+        var cards = document.querySelectorAll("#recoCards .reco-card");
+        cards.forEach(function (c, i) {
+            var d = i - cur;
+            var abs = Math.abs(d);
+            var shift = (d === 0) ? 0 : (d > 0 ? 1 : -1) * 0.72;
+            var rot = (abs === 1) ? d * 9 : 0;
+            c.style.transform = abs <= 1
+                ? "translateX(calc(var(--w) * " + shift + ")) rotate(" + rot + "deg) scale(" + (abs === 0 ? 1 : 0.9) + ")"
+                : "translateX(0) scale(0.8)";
+            c.style.opacity = abs <= 1 ? "1" : "0";
+            c.style.pointerEvents = abs <= 1 ? "auto" : "none";
+            c.style.zIndex = String(10 - abs * 3);
+            c.style.filter = abs === 0 ? "none" : "brightness(0.88)";
+        });
+
+        var prevBtn = document.querySelector(".reco-prev"), nextBtn = document.querySelector(".reco-next");
+        if (prevBtn && nextBtn && count > 1) {
+            prevBtn.style.visibility = cur === 0 ? "hidden" : "visible";
+            nextBtn.style.visibility = cur === count - 1 ? "hidden" : "visible";
+        }
+
+        viewed[cur] = true;
+        if (count > 1 && Object.keys(viewed).length >= count) revealClose();
+    }
+
+    window.recoMove = function (dir) {
+        var next = cur + dir;
+        if (count < 2 || next < 0 || next > count - 1) return;
+        cur = next;
+        layout();
+    };
+    window.recoCardClick = function (i) {
+        if (i === cur) {
+            var id = document.querySelectorAll("#recoCards .reco-card")[i].getAttribute("data-pid");
+            hidePopup();
+            if (id) openProductDetail(id);
+        } else {
+            cur = i;
+            layout();
+        }
+    };
+    var closeReady = false;
+    function revealClose() {
+        if (closeReady) return;
+        closeReady = true;
+        var btn = document.querySelector(".reco-close");
+        if (btn) btn.classList.add("visible");
+    }
+    function hidePopup() {
+        document.getElementById("recoOverlay").classList.remove("show");
+    }
+    window.closeRecoPopup = function () {
+        if (!closeReady) return;
+        hidePopup();
+    };
+
+    document.addEventListener("keydown", function (e) {
+        var open = document.getElementById("recoOverlay").classList.contains("show");
+        if (!open) return;
+        if (e.key === "Escape") closeRecoPopup();
+        if (e.key === "ArrowLeft") recoMove(-1);
+        if (e.key === "ArrowRight") recoMove(1);
+    });
+
+    var startX = null;
+    var stage = document.getElementById("recoStage");
+    stage.addEventListener("touchstart", function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener("touchend", function (e) {
+        if (startX === null) return;
+        var dx = e.changedTouches[0].clientX - startX;
+        startX = null;
+        if (Math.abs(dx) > 40) recoMove(dx < 0 ? 1 : -1);
+    });
+
+    var tries = 0;
+    var timer = setInterval(function () {
+        tries++;
+        if (tries > 20) { clearInterval(timer); return; }
+        if (alreadyShown()) { clearInterval(timer); return; }
+        if (!_cloud.ready || !_cloud.ready.orders || !_cloud.ready.products) return;
+        clearInterval(timer);
+
+        var list = getTopProducts();
+        if (list.length === 0) return;
+
+        buildCards(list);
+        var els = document.querySelectorAll("#recoCards .reco-card");
+        list.forEach(function (row, i) { els[i].setAttribute("data-pid", row.product.id); });
+        markShown();
+        setTimeout(function () {
+            var closeBtn = document.querySelector(".reco-close");
+            closeReady = false;
+            closeBtn.classList.remove("visible");
+            document.getElementById("recoOverlay").classList.add("show");
+            setTimeout(revealClose, 5000);
+        }, 1200);
+    }, 500);
+})();
 </script>
 
 </body>
