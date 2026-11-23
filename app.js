@@ -148,6 +148,7 @@
         /* Real audio files (put them in the "sounds" folder). If a file is missing, the built-in synth sound is used. */
         var FILES = { halloween: "sounds/halloween.mp3", christmas: "sounds/christmas.mp3", newyear: "sounds/newyear.mp3" };
         var aud = null, usingFile = false;
+        var nextFn = null, nextAt = 0, nextTimer = 0; /* synth loop scheduler (tab-safe) */
         try { soundOn = localStorage.getItem("cvspee_event_sound") === "1"; } catch (e) {}
 
         /* ---------- sound (synthesized, no files) ---------- */
@@ -223,7 +224,7 @@
                     t += beat * 3;
                 }
             }
-            timers.push(setTimeout(soundHallo, (t - ac.currentTime + 3) * 1000));
+            scheduleNext(soundHallo, t);
         }
         function soundNewYear() {
             /* "Auld Lang Syne" (traditional, public domain) with soft chords */
@@ -247,7 +248,7 @@
                 tone(mf(n[0]) * 2, t, 0.5, "sine", 0.035);
                 t += d;
             });
-            timers.push(setTimeout(soundNewYear, (t - ac.currentTime + 3) * 1000));
+            scheduleNext(soundNewYear, t);
         }
         function soundXmas() {
             var F = { C: 261.63, D: 293.66, E: 329.63, F: 349.23, G: 392 };
@@ -263,14 +264,34 @@
                 noise(k, 0.22, "highpass", 6500, 0.05); noise(k + 0.07, 0.2, "highpass", 6500, 0.04);
                 tone(2637, k, 0.18, "triangle", 0.015);
             }
-            timers.push(setTimeout(soundXmas, (t - ac.currentTime + 3) * 1000));
+            scheduleNext(soundXmas, t);
+        }
+        /* Schedules the next loop of the synth song.
+           The audio clock (ac.currentTime) freezes when the AudioContext is suspended (tab hidden),
+           but setTimeout keeps running. So the timer must NOT run while hidden/suspended,
+           otherwise a new loop gets stacked on top of the old one = doubled sound. */
+        function scheduleNext(fn, endTime) {
+            nextFn = fn; nextAt = endTime;
+            armNext();
+        }
+        function armNext() {
+            clearTimeout(nextTimer); nextTimer = 0;
+            if (!nextFn || !ac || !sess || document.hidden) return; /* re-armed in visibilitychange */
+            var ms = Math.max(0, (nextAt - ac.currentTime + 3) * 1000);
+            nextTimer = setTimeout(function () {
+                nextTimer = 0;
+                if (!nextFn || !sess || document.hidden) return;
+                if (ac.state !== "running") { armNext(); return; } /* not resumed yet, check again later */
+                var f = nextFn; nextFn = null;
+                f();
+            }, ms);
         }
         function sfxWhistle() {}
         function sfxBoom() {}
         function stopSound() {
             if (aud) { try { aud.pause(); } catch (e) {} aud = null; }
             usingFile = false;
-            timers.forEach(clearTimeout); timers = [];
+            clearTimeout(nextTimer); nextTimer = 0; nextFn = null;
             nodes.forEach(function (n) { try { n.stop(); } catch (e) {} }); nodes = [];
             if (sess && ac) {
                 var s = sess; sess = null;
@@ -449,10 +470,11 @@
         document.addEventListener("visibilitychange", function () {
             if (document.hidden) {
                 if (aud) aud.pause();
+                clearTimeout(nextTimer); nextTimer = 0; /* freeze the loop timer together with the audio clock */
                 if (ac) ac.suspend();
             } else if (soundOn) {
                 if (aud) aud.play().catch(function () {});
-                if (ac && sess) ac.resume();
+                if (ac && sess) { ac.resume(); armNext(); }
             }
         });
         return { set: set };
