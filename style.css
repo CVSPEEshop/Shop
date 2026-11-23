@@ -7204,3 +7204,24 @@ body.dark-mode .reco-sold { color: #aaa; }
   .reco-img { height: 180px; }
   .reco-name, .reco-price { font-size: 15px; }
 }
+
+
+/* ===== Course / year / section badge (e.g. CS-3A) ===== */
+.course-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #1b7f4b;
+    color: #fff;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 1.4;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+body.dark-mode .course-badge {
+    background: #2fa869;
+    color: #08140d;
+}

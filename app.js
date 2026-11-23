@@ -1033,6 +1033,61 @@
         return String(Math.floor(100000 + Math.random() * 900000));
     }
 
+    /* ===== Course + badge (e.g. CS-3A = [course]-[yearlevel][section]) ===== */
+    var COURSES = [
+        { code: "MM",   name: "BSBA - Marketing Management" },
+        { code: "CS",   name: "BS Computer Science (BSCS)" },
+        { code: "ECED", name: "Bachelor of Early Childhood Education (BECEd)" },
+        { code: "ENG",  name: "BSEd - English" },
+        { code: "MATH", name: "BSEd - Mathematics" },
+        { code: "HM",   name: "BS Hospitality Management (BSHM)" },
+        { code: "IT",   name: "BS Information Technology (BSIT)" },
+        { code: "TCP",  name: "Teacher Certificate Program (TCP)" }
+    ];
+
+    function populateCourseSelect() {
+        var sel = document.getElementById("signupCourse");
+        if (!sel || sel.options.length > 1) return;
+        COURSES.forEach(function (c) {
+            var opt = document.createElement("option");
+            opt.value = c.code;
+            opt.textContent = c.name;
+            sel.appendChild(opt);
+        });
+    }
+
+    function buildCourseBadge(course, yearLevel, section) {
+        course = String(course || "").trim().toUpperCase();
+        var m = String(yearLevel || "").match(/\d+/);
+        var sec = String(section || "").replace(/^\s*section\s*/i, "").replace(/\s+/g, "").toUpperCase();
+        if (!course || !m || !sec) return "";
+        return course + "-" + m[0] + sec;
+    }
+
+    function courseBadgeHtml(u) {
+        if (!u || u.role !== "Student") return "";
+        var text = buildCourseBadge(u.course, u.yearLevel, u.section);
+        return text ? ' <span class="course-badge" title="Course, year &amp; section">' + escapeHtml(text) + '</span>' : "";
+    }
+
+    function courseBadgeForEmail(email) {
+        if (!email) return "";
+        var u = getUsers().find(function (x) { return x.email === email; });
+        return courseBadgeHtml(u);
+    }
+
+    function updateSignupBadgePreview() {
+        var el = document.getElementById("signupBadgePreview");
+        if (!el) return;
+        var text = buildCourseBadge(
+            document.getElementById("signupCourse").value,
+            document.getElementById("signupYearLevel").value,
+            document.getElementById("signupSection").value
+        );
+        el.style.display = text ? "block" : "none";
+        el.textContent = text ? "Your badge will be: " + text : "";
+    }
+
     var ROLE_ID_LABELS = {
         Student: "Student ID",
         Teacher: "Teacher ID",
@@ -1044,12 +1099,23 @@
         var field = document.getElementById("signupStudentId");
         field.style.display = (role === "Student") ? "block" : "none";
         if (role !== "Student") field.value = "";
-        ["signupYearLevel", "signupSection"].forEach(function (id) {
+        ["signupCourse", "signupYearLevel", "signupSection"].forEach(function (id) {
             var f = document.getElementById(id);
             if (!f) return;
             f.style.display = (role === "Student") ? "block" : "none";
             if (role !== "Student") f.value = "";
         });
+
+        populateCourseSelect();
+        ["signupCourse", "signupYearLevel", "signupSection"].forEach(function (id) {
+            var f = document.getElementById(id);
+            if (f && !f._badgeBound) {
+                f.addEventListener("change", updateSignupBadgePreview);
+                f.addEventListener("input", updateSignupBadgePreview);
+                f._badgeBound = true;
+            }
+        });
+        updateSignupBadgePreview();
 
         var emailNote = document.getElementById("signupEmailNote");
         if (emailNote) emailNote.style.display = (role === "Student" || role === "Teacher") ? "block" : "none";
@@ -1114,6 +1180,7 @@
         var password = document.getElementById("signupPassword").value;
         var role = document.getElementById("signupRole").value;
         var studentId = document.getElementById("signupStudentId").value.trim();
+        var course = document.getElementById("signupCourse").value;
         var yearLevel = document.getElementById("signupYearLevel").value.trim();
         var section = document.getElementById("signupSection").value.trim();
 
@@ -1125,8 +1192,9 @@
         if (!role) return fail("Please select whether you are a Teacher, Student, or Parent first.", "signupRole");
         if ((role === "Student" || role === "Teacher") && !isCvsuEmail(email)) return fail("Students and teachers must sign up using an official @cvsu.edu.ph email address.", "signupEmail");
         if (role === "Student" && !/^[0-9A-Za-z-]{5,20}$/.test(studentId)) return fail("Please enter your Student ID number first (e.g. 202413535) — we'll match it with your ID.", "signupStudentId");
-        if (role === "Student" && !yearLevel) return fail("Please enter your year level (e.g. 2nd Year).", "signupYearLevel");
-        if (role === "Student" && !section) return fail("Please enter your section (e.g. Section A).", "signupSection");
+        if (role === "Student" && !course) return fail("Please choose your course.", "signupCourse");
+        if (role === "Student" && !yearLevel) return fail("Please choose your year level.", "signupYearLevel");
+        if (role === "Student" && !section) return fail("Please enter your section (e.g. A).", "signupSection");
 
         errorEl.textContent = "";
         return true;
@@ -2166,6 +2234,7 @@
         var password = document.getElementById("signupPassword").value;
         var role = document.getElementById("signupRole").value;
         var studentId = document.getElementById("signupStudentId").value.trim();
+        var course = document.getElementById("signupCourse").value;
         var yearLevel = document.getElementById("signupYearLevel").value.trim();
         var section = document.getElementById("signupSection").value.trim();
         var errorEl = document.getElementById("signupError");
@@ -2208,8 +2277,13 @@
             return false;
         }
 
+        if (role === "Student" && !course) {
+            errorEl.textContent = "Please choose your course.";
+            return false;
+        }
+
         if (role === "Student" && !yearLevel) {
-            errorEl.textContent = "Please enter your year level.";
+            errorEl.textContent = "Please choose your year level.";
             return false;
         }
 
@@ -2268,7 +2342,7 @@
                 downscaleDataUrl(signupCapturedIdImage, 700, 0.6),
                 downscaleDataUrl(signupCapturedSelfieImage, 700, 0.6)
             ]).then(function (photos) {
-                sendSignupCode(name, username, email, password, role, studentId, photos[0], photos[1], yearLevel, section);
+                sendSignupCode(name, username, email, password, role, studentId, photos[0], photos[1], yearLevel, section, course);
             });
         }).catch(function (err) {
             console.error("verify-id error:", err);
@@ -2294,11 +2368,11 @@
         });
     }
 
-    function sendSignupCode(name, username, email, password, role, studentId, idPhoto, selfiePhoto, yearLevel, section) {
+    function sendSignupCode(name, username, email, password, role, studentId, idPhoto, selfiePhoto, yearLevel, section, course) {
         var code = generateCode();
 
         localStorage.setItem("cvspee_pending_signup", JSON.stringify({
-            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", yearLevel: role === "Student" ? (yearLevel || "") : "", section: role === "Student" ? (section || "") : "", idVerified: true,
+            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", course: role === "Student" ? (course || "") : "", yearLevel: role === "Student" ? (yearLevel || "") : "", section: role === "Student" ? (section || "") : "", idVerified: true,
             idPhoto: idPhoto || "", selfiePhoto: selfiePhoto || "", code: code
         }));
 
@@ -2379,7 +2453,7 @@
 
         updateUsers(function (users) {
             if (users.some(function (u) { return u.email === pending.email; })) return users;
-            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", yearLevel: pending.yearLevel || "", section: pending.section || "", idVerified: pending.idVerified === true, avatar: "" });
+            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", course: pending.course || "", yearLevel: pending.yearLevel || "", section: pending.section || "", idVerified: pending.idVerified === true, avatar: "" });
             return users;
         }, function () {
             setCurrentUser(pending.email);
@@ -3526,7 +3600,7 @@
                     '</label>' +
                 '</div>' +
                 '<div class="profile-name-row">' +
-                    '<h3>' + user.name + '</h3>' +
+                    '<h3>' + user.name + courseBadgeHtml(user) + '</h3>' +
                     '<button type="button" class="profile-edit-name-btn" onclick="editName()" title="Edit name"><i class="fa-solid fa-pen"></i></button>' +
                 '</div>' +
                 (user.username ? '<p class="profile-username">' + escapeHtml(user.username) + '</p>' : '') +
@@ -3607,7 +3681,7 @@
                 '<div class="user-search-result" onclick="openUserProfileView(\'' + escapeHtml(u.email || "") + '\', \'' + escapeHtml(u.name || "") + '\')">' +
                     '<div class="user-search-avatar">' + avatarHtml + '</div>' +
                     '<div class="user-search-info">' +
-                        '<div class="user-search-name">' + escapeHtml(u.name || "Unknown") + tagsHtml +
+                        '<div class="user-search-name">' + escapeHtml(u.name || "Unknown") + courseBadgeHtml(u) + tagsHtml +
                         '</div>' +
                         (u.username ? '<div class="user-search-username">' + escapeHtml(u.username) + '</div>' : '') +
                     '</div>' +
@@ -4967,7 +5041,7 @@
             : "";
         avatarEl.innerHTML = avatarInner + dotHtml;
 
-        document.getElementById("userProfileViewName").textContent = name;
+        document.getElementById("userProfileViewName").innerHTML = escapeHtml(name) + courseBadgeHtml(found);
         document.getElementById("userProfileViewUsername").textContent = (found && found.username) ? found.username : "";
 
         var roleWrap = document.getElementById("userProfileViewRoleWrap");
@@ -8769,7 +8843,7 @@
                 '<span class="presence-dot' + (online ? ' online' : '') + '"></span>' +
             '</div>' +
             '<div>' +
-                '<div class="chat-with-name">' + escapeHtml(name) + '</div>' +
+                '<div class="chat-with-name">' + escapeHtml(name) + courseBadgeForEmail(otherEmail) + '</div>' +
                 '<div class="chat-with-status' + (typing ? ' is-typing' : '') + '">' +
                     (typing ? "Typing..." : (online ? "Online" : "Offline")) +
                 '</div>' +
@@ -9110,7 +9184,7 @@
                         '<span class="presence-dot' + (online ? ' online' : '') + '"></span>' +
                     '</div>' +
                     '<div class="msg-list-info">' +
-                        '<div class="msg-list-name">' + escapeHtml(name) + '</div>' +
+                        '<div class="msg-list-name">' + escapeHtml(name) + courseBadgeForEmail(t.otherEmail) + '</div>' +
                         '<div class="msg-list-preview">' + preview + '</div>' +
                     '</div>' +
                     (t.unread > 0 ? '<span class="msg-list-unread-badge">' + t.unread + '</span>' : '') +
@@ -9193,7 +9267,7 @@
                 '<span class="presence-dot' + (online ? ' online' : '') + '"></span>' +
             '</div>' +
             '<div>' +
-                '<div class="chat-with-name">' + escapeHtml(name) + '</div>' +
+                '<div class="chat-with-name">' + escapeHtml(name) + courseBadgeForEmail(currentDmOtherEmail) + '</div>' +
                 '<div class="chat-with-status' + (typing ? ' is-typing' : '') + '">' +
                     (typing ? "Typing..." : (online ? "Online" : "Offline")) +
                 '</div>' +

@@ -93,8 +93,19 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                 <option value="Parent">Parent</option>
             </select>
             <input type="text" id="signupStudentId" placeholder="Student ID number (e.g. 202413535)" inputmode="numeric" autocomplete="off" maxlength="20" style="display:none;">
-            <input type="text" id="signupYearLevel" placeholder="Year level (e.g. Grade 10 / 2nd Year)" autocomplete="off" maxlength="30" style="display:none;">
-            <input type="text" id="signupSection" placeholder="Section (e.g. Section A)" autocomplete="off" maxlength="30" style="display:none;">
+            <select id="signupCourse" style="display:none;">
+                <option value="" disabled selected>Choose your course</option>
+            </select>
+            <select id="signupYearLevel" style="display:none;">
+                <option value="" disabled selected>Year level</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+                <option value="5th Year">5th Year</option>
+            </select>
+            <input type="text" id="signupSection" placeholder="Section (e.g. A)" autocomplete="off" maxlength="10" style="display:none;">
+            <p class="auth-email-note" id="signupBadgePreview" style="display:none;"></p>
 
             <label class="auth-id-upload-label" id="signupIdUploadLabel">Student/Teacher ID or National ID + Selfie</label>
             <button type="button" class="btn auth-scan-btn" id="signupScanBtn" onclick="startIdScanFlow()">📷 Scan ID &amp; Selfie</button>
