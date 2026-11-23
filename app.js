@@ -1044,6 +1044,12 @@
         var field = document.getElementById("signupStudentId");
         field.style.display = (role === "Student") ? "block" : "none";
         if (role !== "Student") field.value = "";
+        ["signupYearLevel", "signupSection"].forEach(function (id) {
+            var f = document.getElementById(id);
+            if (!f) return;
+            f.style.display = (role === "Student") ? "block" : "none";
+            if (role !== "Student") f.value = "";
+        });
 
         var emailNote = document.getElementById("signupEmailNote");
         if (emailNote) emailNote.style.display = (role === "Student" || role === "Teacher") ? "block" : "none";
@@ -1108,6 +1114,8 @@
         var password = document.getElementById("signupPassword").value;
         var role = document.getElementById("signupRole").value;
         var studentId = document.getElementById("signupStudentId").value.trim();
+        var yearLevel = document.getElementById("signupYearLevel").value.trim();
+        var section = document.getElementById("signupSection").value.trim();
 
         if (!name || name.split(/\s+/).length < 2) return fail("Please enter your full name (first and last name) exactly as shown on your ID.", "signupName");
         if (!isValidUsername(username)) return fail("Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @CVSPEE2026).", "signupUsername");
@@ -1117,6 +1125,8 @@
         if (!role) return fail("Please select whether you are a Teacher, Student, or Parent first.", "signupRole");
         if ((role === "Student" || role === "Teacher") && !isCvsuEmail(email)) return fail("Students and teachers must sign up using an official @cvsu.edu.ph email address.", "signupEmail");
         if (role === "Student" && !/^[0-9A-Za-z-]{5,20}$/.test(studentId)) return fail("Please enter your Student ID number first (e.g. 202413535) — we'll match it with your ID.", "signupStudentId");
+        if (role === "Student" && !yearLevel) return fail("Please enter your year level (e.g. 2nd Year).", "signupYearLevel");
+        if (role === "Student" && !section) return fail("Please enter your section (e.g. Section A).", "signupSection");
 
         errorEl.textContent = "";
         return true;
@@ -2156,6 +2166,8 @@
         var password = document.getElementById("signupPassword").value;
         var role = document.getElementById("signupRole").value;
         var studentId = document.getElementById("signupStudentId").value.trim();
+        var yearLevel = document.getElementById("signupYearLevel").value.trim();
+        var section = document.getElementById("signupSection").value.trim();
         var errorEl = document.getElementById("signupError");
         var submitBtn = document.getElementById("signupSubmitBtn");
 
@@ -2193,6 +2205,16 @@
 
         if (role === "Student" && !studentId) {
             errorEl.textContent = "Please enter your Student ID.";
+            return false;
+        }
+
+        if (role === "Student" && !yearLevel) {
+            errorEl.textContent = "Please enter your year level.";
+            return false;
+        }
+
+        if (role === "Student" && !section) {
+            errorEl.textContent = "Please enter your section.";
             return false;
         }
 
@@ -2246,7 +2268,7 @@
                 downscaleDataUrl(signupCapturedIdImage, 700, 0.6),
                 downscaleDataUrl(signupCapturedSelfieImage, 700, 0.6)
             ]).then(function (photos) {
-                sendSignupCode(name, username, email, password, role, studentId, photos[0], photos[1]);
+                sendSignupCode(name, username, email, password, role, studentId, photos[0], photos[1], yearLevel, section);
             });
         }).catch(function (err) {
             console.error("verify-id error:", err);
@@ -2272,11 +2294,11 @@
         });
     }
 
-    function sendSignupCode(name, username, email, password, role, studentId, idPhoto, selfiePhoto) {
+    function sendSignupCode(name, username, email, password, role, studentId, idPhoto, selfiePhoto, yearLevel, section) {
         var code = generateCode();
 
         localStorage.setItem("cvspee_pending_signup", JSON.stringify({
-            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", idVerified: true,
+            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", yearLevel: role === "Student" ? (yearLevel || "") : "", section: role === "Student" ? (section || "") : "", idVerified: true,
             idPhoto: idPhoto || "", selfiePhoto: selfiePhoto || "", code: code
         }));
 
@@ -2357,7 +2379,7 @@
 
         updateUsers(function (users) {
             if (users.some(function (u) { return u.email === pending.email; })) return users;
-            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", idVerified: pending.idVerified === true, avatar: "" });
+            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", yearLevel: pending.yearLevel || "", section: pending.section || "", idVerified: pending.idVerified === true, avatar: "" });
             return users;
         }, function () {
             setCurrentUser(pending.email);

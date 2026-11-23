@@ -93,6 +93,8 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                 <option value="Parent">Parent</option>
             </select>
             <input type="text" id="signupStudentId" placeholder="Student ID number (e.g. 202413535)" inputmode="numeric" autocomplete="off" maxlength="20" style="display:none;">
+            <input type="text" id="signupYearLevel" placeholder="Year level (e.g. Grade 10 / 2nd Year)" autocomplete="off" maxlength="30" style="display:none;">
+            <input type="text" id="signupSection" placeholder="Section (e.g. Section A)" autocomplete="off" maxlength="30" style="display:none;">
 
             <label class="auth-id-upload-label" id="signupIdUploadLabel">Student/Teacher ID or National ID + Selfie</label>
             <button type="button" class="btn auth-scan-btn" id="signupScanBtn" onclick="startIdScanFlow()">📷 Scan ID &amp; Selfie</button>
@@ -1853,7 +1855,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                 <strong>What we collect</strong><br>
                 &bull; <em>Account details:</em> your full name, username, email,
                 password and role (student, teacher or parent), and your Student
-                ID number if you are a student.<br>
+                ID number, year level and section if you are a student.<br>
                 &bull; <em>ID verification:</em> a photo of your ID and a selfie
                 holding it.<br>
                 &bull; <em>Orders:</em> your name, phone number, pinned delivery
@@ -1944,7 +1946,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
                     <strong>Create and verify your account.</strong>
                     Sign up with your full name, username, email, password and role.
                     Students and teachers use their official @cvsu.edu.ph email, and
-                    students also enter their Student ID number. Fill up the form
+                    students also enter their Student ID number, year level and section. Fill up the form
                     first, then scan your ID, take a selfie holding it, and enter
                     the verification code we send to your email.
                 </li>
@@ -2216,7 +2218,7 @@ try { var _et = localStorage.getItem("cvspee_event_theme"); if (_et) document.do
     });
 </script>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 
 <!-- Top Sellers popup -->
 
