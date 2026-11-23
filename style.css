@@ -7264,3 +7264,280 @@ body.auth-locked {
 .auth-overlay .auth-skip {
     display: none !important;
 }
+
+
+/* ===== Login page: split layout (design on the left, login menu on the right) ===== */
+.auth-overlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: var(--cvsu-green-deep);
+}
+.auth-overlay .auth-box {
+    order: 2;
+    flex: 0 0 min(500px, 100%);
+    max-width: none;
+    width: min(500px, 100%);
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    padding: 40px 48px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.28);
+    position: relative;
+    z-index: 2;
+}
+.auth-overlay .auth-box > :first-child { margin-top: auto; }
+.auth-overlay .auth-box > :last-child { margin-bottom: auto; }
+
+.auth-hero {
+    order: 1;
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 56px clamp(32px, 6vw, 96px);
+    color: #fff;
+    background:
+        radial-gradient(120% 90% at 0% 0%, var(--cvsu-green) 0%, transparent 60%),
+        linear-gradient(155deg, var(--cvsu-green-dark) 0%, var(--cvsu-green-deep) 100%);
+}
+.auth-hero-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--cvsu-gold-bright);
+    pointer-events: none;
+}
+.auth-hero-ring-a {
+    width: 560px; height: 560px;
+    right: -220px; bottom: -240px;
+    opacity: 0.55;
+    box-shadow: inset 0 0 0 28px rgba(255, 199, 44, 0.06), 0 0 0 36px rgba(255, 199, 44, 0.05);
+}
+.auth-hero-ring-b {
+    width: 240px; height: 240px;
+    left: -90px; top: -90px;
+    opacity: 0.35;
+    background: rgba(255, 199, 44, 0.07);
+}
+.auth-hero-dots {
+    position: absolute;
+    left: 5%; bottom: 8%;
+    width: 170px; height: 170px;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1.6px, transparent 1.7px);
+    background-size: 18px 18px;
+    pointer-events: none;
+}
+.auth-hero-content {
+    position: relative;
+    max-width: 520px;
+    animation: authHeroIn 0.7s ease-out both;
+}
+.auth-hero-school {
+    display: inline-block;
+    margin: 0 0 20px;
+    padding-left: 14px;
+    border-left: 4px solid var(--cvsu-gold-bright);
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--cvsu-gold-bright);
+}
+.auth-hero-title {
+    margin: 0 0 18px;
+    font-family: "Merriweather", Georgia, serif;
+    font-size: clamp(30px, 3.6vw, 48px);
+    font-weight: 900;
+    line-height: 1.18;
+    color: #fff;
+}
+.auth-hero-text {
+    margin: 0 0 28px;
+    max-width: 44ch;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.82);
+}
+.auth-hero-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.auth-hero-chips li {
+    padding: 7px 16px;
+    border: 1px solid rgba(255, 199, 44, 0.7);
+    border-radius: 999px;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cvsu-gold-bright);
+    background: rgba(255, 199, 44, 0.08);
+}
+@keyframes authHeroIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .auth-hero-content { animation: none; }
+}
+
+/* tablet/phone: hero goes away, login takes the full screen */
+@media (max-width: 900px) {
+    .auth-hero { display: none; }
+    .auth-overlay { background: linear-gradient(160deg, #eef5f0 0%, #f9faf9 55%, #e6efe9 100%); }
+    body.dark-mode .auth-overlay { background: #121212; }
+    .auth-overlay .auth-box {
+        flex-basis: 100%;
+        width: 100%;
+        padding: 32px 22px;
+        box-shadow: none;
+    }
+}
+
+
+/* ===== Login lamp + login-page dark mode ===== */
+.auth-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #040705;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+}
+.auth-hero-content { z-index: 1; }
+body.dark-mode .auth-hero::after { opacity: 0.84; }
+body.dark-mode .auth-hero-chips li {
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #d6d6d6;
+    background: rgba(255, 255, 255, 0.04);
+}
+body.dark-mode .auth-overlay .auth-box { box-shadow: -24px 0 60px rgba(0, 0, 0, 0.6); }
+body.dark-mode .auth-brand span { color: #aaa; }
+
+.auth-lamp {
+    position: absolute;
+    top: 0;
+    left: calc((100% - 500px) * 0.78);
+    width: 0;
+    height: 0;
+    z-index: 3;
+}
+.lamp-swing {
+    position: absolute;
+    top: 0;
+    left: -70px;
+    width: 140px;
+    height: 220px;
+    transform-origin: 70px 0;
+}
+.lamp-swing.swinging { animation: lampSwing 1.3s ease-out; }
+@keyframes lampSwing {
+    0%   { transform: rotate(0); }
+    18%  { transform: rotate(7deg); }
+    42%  { transform: rotate(-5deg); }
+    62%  { transform: rotate(3deg); }
+    82%  { transform: rotate(-1.5deg); }
+    100% { transform: rotate(0); }
+}
+.lamp-wire {
+    position: absolute;
+    left: 69px; top: 0;
+    width: 2px; height: 66px;
+    background: rgba(255, 255, 255, 0.6);
+}
+.lamp-shade {
+    position: absolute;
+    left: 20px; top: 64px;
+    width: 100px; height: 58px;
+    z-index: 2;
+    background: linear-gradient(180deg, var(--cvsu-gold-bright), var(--cvsu-gold));
+    clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%);
+    transition: filter 0.5s ease;
+}
+.lamp-bulb {
+    position: absolute;
+    left: 56px; top: 108px;
+    width: 28px; height: 28px;
+    z-index: 1;
+    border-radius: 50%;
+    background: #fff6c9;
+    box-shadow: 0 0 26px 12px rgba(255, 199, 44, 0.75);
+    transition: background 0.5s ease, box-shadow 0.5s ease;
+}
+.lamp-beam {
+    position: absolute;
+    left: -130px; top: 122px;
+    width: 400px;
+    height: min(72vh, 560px);
+    background: linear-gradient(180deg, rgba(255, 214, 102, 0.3), rgba(255, 214, 102, 0));
+    clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+.lamp-pull {
+    --pull: 0px;
+    position: absolute;
+    left: 91px; top: 112px;
+    width: 28px;
+    height: calc(72px + var(--pull));
+    z-index: 3;
+    padding: 0;
+    border: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    touch-action: none;
+    transition: height 0.35s cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+.auth-lamp.dragging .lamp-pull { transition: none; cursor: grabbing; }
+.lamp-cord {
+    flex: 1;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.7);
+}
+.lamp-knob {
+    width: 14px; height: 18px;
+    border-radius: 7px;
+    background: var(--cvsu-gold-bright);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.lamp-pull:focus-visible { outline: 2px solid var(--cvsu-gold-bright); outline-offset: 4px; border-radius: 6px; }
+
+/* lamp off = dark mode */
+body.dark-mode .lamp-beam { opacity: 0; }
+body.dark-mode .lamp-bulb { background: #6b6b60; box-shadow: none; }
+body.dark-mode .lamp-shade { filter: brightness(0.5) saturate(0.7); }
+
+@media (prefers-reduced-motion: reduce) {
+    .lamp-swing.swinging { animation: none; }
+    .auth-hero::after, .lamp-bulb, .lamp-beam, .lamp-shade, .lamp-pull { transition: none; }
+}
+
+/* phone/tablet: no hero, so the lamp hangs in the top-right corner */
+@media (max-width: 900px) {
+    .auth-lamp {
+        left: auto;
+        right: 56px;
+        transform: scale(0.72);
+    }
+    .lamp-beam { display: none; }
+    body.dark-mode .auth-overlay .auth-box { background: #1e1e1e; }
+}
+
+/* on the light mobile login the wire and cord need a dark color to be visible */
+@media (max-width: 900px) {
+    .lamp-wire, .lamp-cord { background: rgba(20, 40, 28, 0.65); }
+    body.dark-mode .lamp-wire, body.dark-mode .lamp-cord { background: rgba(255, 255, 255, 0.7); }
+}

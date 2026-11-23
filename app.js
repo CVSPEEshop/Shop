@@ -103,10 +103,19 @@
         return "cvspee_dark_mode_" + email;
     }
 
+    var DARK_GUEST_KEY = "cvspee_dark_mode_guest";
+
     function applyDarkMode(isDark) {
         document.body.classList.toggle("dark-mode", isDark);
         var toggle = document.getElementById("darkModeToggle");
         if (toggle) toggle.checked = isDark;
+        var lampPull = document.getElementById("authLampPull");
+        if (lampPull) lampPull.setAttribute("aria-pressed", isDark ? "true" : "false");
+    }
+
+    function persistDarkMode(isDark) {
+        var email = currentUserEmailForDarkMode();
+        localStorage.setItem(email ? darkModeKeyFor(email) : DARK_GUEST_KEY, isDark ? "1" : "0");
     }
 
     function currentUserEmailForDarkMode() {
@@ -116,20 +125,73 @@
     function toggleDarkMode() {
         var isDark = document.getElementById("darkModeToggle").checked;
         applyDarkMode(isDark);
-        var email = currentUserEmailForDarkMode();
-        if (email) {
-            localStorage.setItem(darkModeKeyFor(email), isDark ? "1" : "0");
-        }
+        persistDarkMode(isDark);
     }
 
     function loadDarkModeForCurrentUser() {
         var email = currentUserEmailForDarkMode();
-        var isDark = !!email && localStorage.getItem(darkModeKeyFor(email)) === "1";
+        var isDark = email
+            ? localStorage.getItem(darkModeKeyFor(email)) === "1"
+            : localStorage.getItem(DARK_GUEST_KEY) === "1";
         applyDarkMode(isDark);
     }
 
     (function initDarkMode() {
         loadDarkModeForCurrentUser();
+    })();
+
+    /* Login page lamp: pull the cord to switch dark mode (same switch as the side menu) */
+    (function initAuthLamp() {
+        var lamp = document.getElementById("authLamp");
+        var pull = document.getElementById("authLampPull");
+        if (!lamp || !pull) return;
+        var swing = lamp.querySelector(".lamp-swing");
+        var startY = null, dragged = 0, suppressClick = false;
+
+        function setPull(px) { pull.style.setProperty("--pull", px + "px"); }
+
+        function toggleFromLamp() {
+            var isDark = !document.body.classList.contains("dark-mode");
+            applyDarkMode(isDark);
+            persistDarkMode(isDark);
+            setPull(26);
+            setTimeout(function () { setPull(0); }, 160);
+            swing.classList.remove("swinging");
+            void swing.offsetWidth;
+            swing.classList.add("swinging");
+        }
+
+        pull.addEventListener("pointerdown", function (e) {
+            startY = e.clientY;
+            dragged = 0;
+            lamp.classList.add("dragging");
+            try { pull.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+        pull.addEventListener("pointermove", function (e) {
+            if (startY === null) return;
+            dragged = Math.max(0, Math.min(40, e.clientY - startY));
+            setPull(dragged);
+        });
+        function endDrag() {
+            if (startY === null) return;
+            var d = dragged;
+            startY = null;
+            dragged = 0;
+            lamp.classList.remove("dragging");
+            setPull(0);
+            if (d >= 14) {
+                suppressClick = true;
+                setTimeout(function () { suppressClick = false; }, 60);
+                toggleFromLamp();
+            }
+        }
+        pull.addEventListener("pointerup", endDrag);
+        pull.addEventListener("pointercancel", endDrag);
+        pull.addEventListener("click", function () {
+            if (suppressClick) return;
+            toggleFromLamp();
+        });
+        swing.addEventListener("animationend", function () { swing.classList.remove("swinging"); });
     })();
 
     var EVENT_THEMES = {
@@ -970,6 +1032,12 @@
         localStorage.setItem("cvspee_current_user", email);
         migrateLegacyCart();
         sendPresenceHeartbeat();
+        /* a lamp pull made on the login page carries over into the account */
+        var guestDark = localStorage.getItem(DARK_GUEST_KEY);
+        if (guestDark !== null) {
+            localStorage.setItem(darkModeKeyFor(email), guestDark);
+            localStorage.removeItem(DARK_GUEST_KEY);
+        }
         loadDarkModeForCurrentUser();
         _dmSoundInitialized = false;
     }
