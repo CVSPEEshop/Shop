@@ -140,58 +140,196 @@
         loadDarkModeForCurrentUser();
     })();
 
-    /* Login page lamp: pull the cord to switch dark mode (same switch as the side menu) */
+    /* Login page lamp: pull the cord to switch dark mode (same switch as the side menu).
+       The cord is a soft rope (verlet chain drawn as one smooth curve) with the knob always
+       attached to its end. The cord length and the lamp tilt are springs, so pulling and
+       releasing feels elastic and the rope sways and settles naturally. */
     (function initAuthLamp() {
         var lamp = document.getElementById("authLamp");
         var pull = document.getElementById("authLampPull");
         if (!lamp || !pull) return;
         var swing = lamp.querySelector(".lamp-swing");
-        var startY = null, dragged = 0, suppressClick = false;
+        var knob = pull.querySelector(".lamp-knob");
+        if (!swing || !knob) return;
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-        function setPull(px) { pull.style.setProperty("--pull", px + "px"); }
+        /* draw the cord as an SVG curve instead of a rigid box */
+        var NS = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("class", "lamp-rope");
+        svg.setAttribute("aria-hidden", "true");
+        var path = document.createElementNS(NS, "path");
+        path.setAttribute("class", "lamp-rope-path");
+        svg.appendChild(path);
+        pull.insertBefore(svg, pull.firstChild);
+        pull.classList.add("rope-on");
 
-        function toggleFromLamp() {
+        var N = 11;            /* rope points */
+        var L0 = 54;           /* resting cord length (px) */
+        var AX = 14;           /* x of the anchor inside the button */
+        var PIVOT_Y = 112;     /* distance from the lamp pivot to the top of the button */
+        var G = 1800;          /* gravity (px/s^2) */
+        var MAX_PULL = 56, TRIGGER = 16;
+
+        var startX = null, startY = null, rawDrag = 0, dragX = 0, suppressClick = false;
+        var pos = 0, vel = 0, posTarget = 0;     /* cord length offset (px) */
+        var ang = 0, angVel = 0;                 /* lamp tilt (deg) */
+        var X = [], Y = [], PX = [], PY = [];
+        var raf = 0, lastT = 0, freeTime = 0;
+
+        function resetRope() {
+            var seg = (L0 + pos) / (N - 1);
+            for (var i = 0; i < N; i++) { X[i] = PX[i] = AX; Y[i] = PY[i] = i * seg; }
+        }
+
+        function uiScale() {
+            var w = swing.offsetWidth;
+            var s = w ? swing.getBoundingClientRect().width / w : 1;
+            return s > 0 ? s : 1;
+        }
+
+        function render() {
+            var d = "M" + X[0].toFixed(2) + " " + Y[0].toFixed(2);
+            for (var i = 1; i < N - 1; i++) {
+                var mx = (X[i] + X[i + 1]) / 2, my = (Y[i] + Y[i + 1]) / 2;
+                d += " Q" + X[i].toFixed(2) + " " + Y[i].toFixed(2) + " " + mx.toFixed(2) + " " + my.toFixed(2);
+            }
+            d += " L" + X[N - 1].toFixed(2) + " " + Y[N - 1].toFixed(2);
+            path.setAttribute("d", d);
+            /* the knob hangs from the end of the rope and follows its direction */
+            var dx = X[N - 1] - X[N - 3], dy = Y[N - 1] - Y[N - 3];
+            var a = -Math.atan2(dx, dy) * 180 / Math.PI;
+            knob.style.transform = "translate(" + (X[N - 1] - 7).toFixed(2) + "px," + Y[N - 1].toFixed(2) + "px) rotate(" + a.toFixed(2) + "deg)";
+            swing.style.transform = ang ? "rotate(" + ang.toFixed(3) + "deg)" : "";
+        }
+
+        function settleNow() {
+            pos = 0; vel = 0; ang = 0; angVel = 0;
+            resetRope();
+            render();
+            raf = 0;
+        }
+
+        function step(t) {
+            var dt = Math.min((t - lastT) / 1000, 1 / 30);
+            lastT = t;
+            var dragging = startY !== null;
+            freeTime = dragging ? 0 : freeTime + dt;
+
+            /* cord length: firm while dragging, springy when released */
+            var k = dragging ? 700 : 170, c = dragging ? 52 : 8;
+            vel += (-k * (pos - posTarget) - c * vel) * dt;
+            pos += vel * dt;
+            if (pos < -16) { pos = -16; vel *= -0.3; }
+
+            /* lamp tilt */
+            var angTarget = dragging ? Math.min(pos, MAX_PULL) * 0.09 : 0;
+            var prevAV = angVel;
+            angVel += (-60 * (ang - angTarget) - 2.4 * angVel) * dt;
+            ang += angVel * dt;
+            var aRad = dt > 0 ? ((angVel - prevAV) / dt) * Math.PI / 180 : 0;
+
+            /* rope: verlet integration + length constraints */
+            var SUB = 3, h = dt / SUB;
+            var seg = (L0 + pos) / (N - 1);
+            var th = ang * Math.PI / 180;
+            var gx = G * Math.sin(th), gy = G * Math.cos(th);
+            var damp = Math.exp(-3 * h);
+            var mv = 0;
+            for (var s = 0; s < SUB; s++) {
+                mv = 0;
+                for (var i = 1; i < N; i++) {
+                    var vx = (X[i] - PX[i]) * damp, vy = (Y[i] - PY[i]) * damp;
+                    PX[i] = X[i]; PY[i] = Y[i];
+                    X[i] += vx + (gx + aRad * (Y[i] + PIVOT_Y)) * h * h;
+                    Y[i] += vy + gy * h * h;
+                }
+                if (dragging) X[N - 1] += (AX + dragX - X[N - 1]) * 0.35;
+                X[0] = AX; Y[0] = 0;
+                for (var it = 0; it < 12; it++) {
+                    for (var j = 0; j < N - 1; j++) {
+                        var ddx = X[j + 1] - X[j], ddy = Y[j + 1] - Y[j];
+                        var len = Math.sqrt(ddx * ddx + ddy * ddy) || 0.0001;
+                        var diff = (len - seg) / len;
+                        if (j === 0) {
+                            X[1] -= ddx * diff; Y[1] -= ddy * diff;
+                        } else {
+                            X[j] += ddx * diff * 0.5; Y[j] += ddy * diff * 0.5;
+                            X[j + 1] -= ddx * diff * 0.5; Y[j + 1] -= ddy * diff * 0.5;
+                        }
+                    }
+                }
+                for (var m = 1; m < N; m++) {
+                    var mm = Math.abs(X[m] - PX[m]) + Math.abs(Y[m] - PY[m]);
+                    if (mm > mv) mv = mm;
+                }
+            }
+
+            render();
+
+            var settled = mv < 0.01 && Math.abs(pos - posTarget) < 0.02 && Math.abs(vel) < 0.05 &&
+                          Math.abs(ang - angTarget) < 0.01 && Math.abs(angVel) < 0.05;
+            if (!dragging && (settled || freeTime > 6)) { settleNow(); return; }
+            raf = requestAnimationFrame(step);
+        }
+
+        function run() {
+            if (reduceMotion) return;
+            if (!raf) { lastT = performance.now(); raf = requestAnimationFrame(step); }
+        }
+
+        function toggleFromLamp(fromTap) {
             var isDark = !document.body.classList.contains("dark-mode");
             applyDarkMode(isDark);
             persistDarkMode(isDark);
-            setPull(26);
-            setTimeout(function () { setPull(0); }, 160);
-            swing.classList.remove("swinging");
-            void swing.offsetWidth;
-            swing.classList.add("swinging");
+            if (reduceMotion) return;
+            if (fromTap) vel += 800;      /* quick tug when tapped / pressed with keyboard */
+            angVel += 90;                 /* gentle sway after the click */
+            for (var i = 1; i < N; i++) { PX[i] -= 0.33 * Math.pow(i / (N - 1), 1.4); }   /* small whip along the rope */
+            run();
         }
 
         pull.addEventListener("pointerdown", function (e) {
+            startX = e.clientX;
             startY = e.clientY;
-            dragged = 0;
+            rawDrag = 0; dragX = 0;
+            posTarget = 0;
             lamp.classList.add("dragging");
             try { pull.setPointerCapture(e.pointerId); } catch (err) {}
+            run();
         });
         pull.addEventListener("pointermove", function (e) {
             if (startY === null) return;
-            dragged = Math.max(0, Math.min(40, e.clientY - startY));
-            setPull(dragged);
+            var sc = uiScale();
+            rawDrag = Math.max(0, (e.clientY - startY) / sc);
+            dragX = Math.max(-16, Math.min(16, (e.clientX - startX) / sc));
+            /* rubber band: the cord gets harder to pull the further it goes */
+            posTarget = MAX_PULL * (1 - Math.exp(-rawDrag / MAX_PULL));
+            run();
         });
         function endDrag() {
             if (startY === null) return;
-            var d = dragged;
-            startY = null;
-            dragged = 0;
+            var passed = rawDrag >= TRIGGER;
+            startX = null; startY = null;
+            rawDrag = 0; dragX = 0;
+            posTarget = 0;
             lamp.classList.remove("dragging");
-            setPull(0);
-            if (d >= 14) {
+            if (passed) {
                 suppressClick = true;
                 setTimeout(function () { suppressClick = false; }, 60);
-                toggleFromLamp();
+                toggleFromLamp(false);
             }
+            run();
         }
         pull.addEventListener("pointerup", endDrag);
         pull.addEventListener("pointercancel", endDrag);
         pull.addEventListener("click", function () {
             if (suppressClick) return;
-            toggleFromLamp();
+            toggleFromLamp(true);
         });
-        swing.addEventListener("animationend", function () { swing.classList.remove("swinging"); });
+
+        resetRope();
+        render();
     })();
 
     var EVENT_THEMES = {
@@ -1010,13 +1148,6 @@
         }
     }
 
-    function continueAsOwner(e) {
-        if (e) e.preventDefault();
-        setCurrentUser(OWNER_EMAIL);
-        closeAuthModal();
-        renderAccount();
-    }
-
     function getCurrentUser() {
         var email = localStorage.getItem("cvspee_current_user");
         if (!email) return null;
@@ -1090,7 +1221,6 @@
         var isBaseStep = (tab === "signin" || tab === "signup");
         document.getElementById("authTabs").style.display = isBaseStep ? "flex" : "none";
         document.getElementById("authSkip").style.display = isBaseStep ? "inline-block" : "none";
-        document.getElementById("authOwnerSkip").style.display = isBaseStep ? "inline-block" : "none";
 
         document.getElementById("authSubtitle").textContent = authSubtitles[tab] || "";
 

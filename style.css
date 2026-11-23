@@ -7290,8 +7290,13 @@ body.auth-locked {
     position: relative;
     z-index: 2;
 }
-.auth-overlay .auth-box > :first-child { margin-top: auto; }
-.auth-overlay .auth-box > :last-child { margin-bottom: auto; }
+/* center the form vertically in the white panel (still scrolls safely on short screens).
+   Don't use :first/:last-child auto margins: the last child (.auth-skip) is display:none. */
+.auth-overlay .auth-box::before,
+.auth-overlay .auth-box::after {
+    content: "";
+    flex: 1 0 0;
+}
 
 .auth-hero {
     order: 1;
@@ -7439,15 +7444,7 @@ body.dark-mode .auth-brand span { color: #aaa; }
     width: 140px;
     height: 220px;
     transform-origin: 70px 0;
-}
-.lamp-swing.swinging { animation: lampSwing 1.3s ease-out; }
-@keyframes lampSwing {
-    0%   { transform: rotate(0); }
-    18%  { transform: rotate(7deg); }
-    42%  { transform: rotate(-5deg); }
-    62%  { transform: rotate(3deg); }
-    82%  { transform: rotate(-1.5deg); }
-    100% { transform: rotate(0); }
+    will-change: transform;
 }
 .lamp-wire {
     position: absolute;
@@ -7490,7 +7487,7 @@ body.dark-mode .auth-brand span { color: #aaa; }
     left: 91px; top: 112px;
     width: 28px;
     height: calc(72px + var(--pull));
-    z-index: 3;
+    z-index: 1; /* below the shade so the cord comes out from under it */
     padding: 0;
     border: 0;
     background: none;
@@ -7499,9 +7496,11 @@ body.dark-mode .auth-brand span { color: #aaa; }
     align-items: center;
     cursor: grab;
     touch-action: none;
-    transition: height 0.35s cubic-bezier(0.3, 1.7, 0.5, 1);
+    will-change: height, transform;
+    transform-origin: 50% 0;
+    -webkit-tap-highlight-color: transparent;
 }
-.auth-lamp.dragging .lamp-pull { transition: none; cursor: grabbing; }
+.auth-lamp.dragging .lamp-pull { cursor: grabbing; }
 .lamp-cord {
     flex: 1;
     width: 2px;
@@ -7513,6 +7512,29 @@ body.dark-mode .auth-brand span { color: #aaa; }
     background: var(--cvsu-gold-bright);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
+/* soft rope cord (JS adds .rope-on): the cord is an SVG curve and the knob hangs from its end */
+.lamp-pull.rope-on { display: block; height: 72px; }
+.lamp-pull.rope-on .lamp-cord { display: none; }
+.lamp-pull.rope-on .lamp-knob {
+    position: absolute;
+    left: 0; top: 0;
+    transform-origin: 50% 0;
+    will-change: transform;
+}
+.lamp-rope {
+    position: absolute;
+    left: 0; top: 0;
+    width: 28px; height: 72px;
+    overflow: visible;
+    pointer-events: none;
+}
+.lamp-rope-path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.7);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .lamp-pull:focus-visible { outline: 2px solid var(--cvsu-gold-bright); outline-offset: 4px; border-radius: 6px; }
 
 /* lamp off = dark mode */
@@ -7521,7 +7543,6 @@ body.dark-mode .lamp-bulb { background: #6b6b60; box-shadow: none; }
 body.dark-mode .lamp-shade { filter: brightness(0.5) saturate(0.7); }
 
 @media (prefers-reduced-motion: reduce) {
-    .lamp-swing.swinging { animation: none; }
     .auth-hero::after, .lamp-bulb, .lamp-beam, .lamp-shade, .lamp-pull { transition: none; }
 }
 
@@ -7540,4 +7561,6 @@ body.dark-mode .lamp-shade { filter: brightness(0.5) saturate(0.7); }
 @media (max-width: 900px) {
     .lamp-wire, .lamp-cord { background: rgba(20, 40, 28, 0.65); }
     body.dark-mode .lamp-wire, body.dark-mode .lamp-cord { background: rgba(255, 255, 255, 0.7); }
+    .lamp-rope-path { stroke: rgba(20, 40, 28, 0.65); }
+    body.dark-mode .lamp-rope-path { stroke: rgba(255, 255, 255, 0.7); }
 }
