@@ -1136,6 +1136,7 @@
 
     function openAuthModal() {
         authOverlay.classList.add("show");
+        document.body.classList.add("auth-locked");
         toggleSignupStudentId();
         resetIdScanState();
     }
@@ -1143,6 +1144,7 @@
     function closeAuthModal(e) {
         if (e) e.preventDefault();
         authOverlay.classList.remove("show");
+        document.body.classList.remove("auth-locked");
     }
 
     function resetIdScanState() {

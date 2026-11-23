@@ -130,6 +130,7 @@
 
     var tries = 0;
     var timer = setInterval(function () {
+        if (document.body.classList.contains("auth-locked")) return;
         tries++;
         if (tries > 20) { clearInterval(timer); return; }
         if (alreadyShown()) { clearInterval(timer); return; }
