@@ -1,5 +1,221 @@
     var BACKEND_URL = "https://shop.dzarjhay.workers.dev";
 
+    /* =====================================================================
+       CONTENT MODERATION
+       Layer 1 (instant, offline): modLocalCheck(text) - profanity list that also
+         catches disguised spellings: b0b0, g@g0, vovo, b.o.b.o, b o b o, f*ck, fuuuck...
+       Layer 2 (AI via the Worker): /api/moderate-text and /api/moderate-image
+       ===================================================================== */
+    var MODERATE_TEXT_ENDPOINT = BACKEND_URL + "/api/moderate-text";
+    var MODERATE_IMAGE_ENDPOINT = BACKEND_URL + "/api/moderate-image";
+
+    /* true  = if the AI can't be reached, the photo is rejected (safer)
+       false = if the AI can't be reached, the photo is allowed through */
+    var MOD_BLOCK_IMAGES_WHEN_OFFLINE = true;
+
+    var MOD_MSG_TEXT = "Your message contains words that aren't allowed (cursing or vulgar language in any language, including disguised spellings). Please rewrite it politely.";
+    var MOD_MSG_IMAGE = "This photo was declined because it looks inappropriate (nudity, sexual, violent or offensive content). Please choose a different photo.";
+    var MOD_MSG_IMAGE_OFFLINE = "We couldn't verify this photo right now. Please check your internet connection and try again.";
+
+    /* ---- word lists -------------------------------------------------------
+       MOD_STRONG: long / unambiguous words. Matched even inside other words
+                   ("fuckyou", "tanginamo"). A space in an entry = "any gap".
+       MOD_WORDS : short words. Matched only as a whole word (so "class",
+                   "potato", "Putatan", "bobot", "shiitake" are NOT flagged),
+                   with common Filipino/English prefixes & suffixes allowed
+                   (nakabobo, bobong, shitty, asses...).
+       Add or remove words freely - lowercase, plain letters only.          */
+    var MOD_STRONG = [
+        /* English */
+        "fuck", "phuck", "bitch", "asshole", "dumbass", "jackass", "bullshit", "dipshit",
+        "motherfuck", "faggot", "bollocks",
+        /* Filipino / Taglish */
+        "putangina", "putang ina", "potangina", "tangina", "tang ina", "tangna", "kingina", "kinangina",
+        "ptangina", "ptngina", "tngina", "tarantado", "tarantada", "punyeta", "pakyu", "pak yu",
+        "pakshet", "pakingshet", "hinayupak", "kantot", "kantutan", "pekpek", "pukinangina", "pukingina",
+        /* Spanish / Portuguese / Italian / French / German */
+        "pendejo", "mierda", "maricon", "hijueputa", "hijo de puta", "chinga", "caralho", "buceta", "fodase",
+        "putain", "connard", "salope", "encule", "scheisse", "arschloch", "fotze", "hurensohn", "wichser",
+        "cazzo", "vaffanculo", "stronzo", "puttana",
+        /* Indonesian / Malay */
+        "bangsat", "kontol", "memek", "ngentot", "jancok", "jancuk", "pukimak", "goblok", "tolol",
+        /* Hindi / Urdu (romanized) */
+        "madarchod", "behenchod", "bhenchod", "chutiya", "bhosdike",
+        /* Korean / Chinese / Japanese (romanized) */
+        "sibal", "gaesaekki", "byeongshin", "caonima", "cao ni ma", "tamade", "wangbadan", "chikusho",
+        /* Arabic (romanized) */
+        "sharmouta", "sharmoota", "kos omak", "kus omak",
+        /* Russian (romanized) */
+        "blyat", "blyad", "pizdec", "pizda",
+        /* Turkish */
+        "orospu", "siktir"
+    ];
+
+    var MOD_WORDS = [
+        /* English */
+        "shit", "ass", "dick", "cock", "pussy", "cunt", "whore", "slut", "bastard", "nigger", "nigga",
+        "fag", "tranny", "retard", "twat", "wanker", "fuk", "fck", "wtf", "stfu", "gtfo", "kys",
+        /* Filipino / Cebuano */
+        "bobo", "tanga", "gago", "ulol", "ulul", "puta", "pota", "putang", "putcha", "pucha", "puki",
+        "kupal", "lintik", "peste", "bwisit", "buwisit", "bwiset", "buwiset", "jakol", "hindot", "burat",
+        "bayag", "pokpok", "iyot", "bilat", "yawa", "piste", "pisti", "gagu",
+        /* Spanish / Portuguese / Italian / French / others */
+        "puta", "cabron", "joder", "verga", "culero", "carajo", "merda", "porra", "merde", "nique",
+        "kuso", "gandu", "harami", "randi", "suka", "huy", "khuy", "amk"
+    ];
+
+    /* phrases that are fine and should never be flagged (add false positives here) */
+    var MOD_ALLOW = [];
+
+    /* each letter -> the characters people use to disguise it */
+    var MOD_CLASSES = {
+        a: "[a@4]", b: "[b8v]", c: "[ck(]", e: "[e3]", g: "[g9]", i: "[il1!|]", k: "[kc]", l: "[li1|]",
+        o: "[o0]", s: "[s5$z]", t: "[t7+]", u: "[uv]", v: "[vbu]", y: "[yi]", z: "[zs2]"
+    };
+    var MOD_SEP_WORD = "[\\s._\\-]?";    /* gap allowed between letters of a whole-word match */
+    var MOD_SEP_STRONG = "[._\\-]?";     /* gap allowed between letters of an embedded match (no spaces) */
+    var MOD_GAP = "[\\s._\\-]*";         /* explicit space inside an entry */
+    var MOD_WILD = "[*#%]";              /* f*ck, sh*t */
+    var MOD_PREFIX = "(?:naka|ka|pa|mag|nag|pag){0,2}";
+    var MOD_SUFFIX = "(?:ng|han|hin|an|s|es|ed|er|ers|ing|ting|y|ty|head|face)";
+
+    var MOD_CYR = {
+        "\u0430": "a", "\u0432": "b", "\u0435": "e", "\u0451": "e", "\u043a": "k", "\u043c": "m", "\u043d": "h",
+        "\u043e": "o", "\u0440": "p", "\u0441": "c", "\u0442": "t", "\u0443": "y", "\u0445": "x", "\u0456": "i",
+        "\u0455": "s", "\u0458": "j", "\u03b1": "a", "\u03bf": "o", "\u03c1": "p", "\u03b9": "i", "\u03c4": "t",
+        "\u03ba": "k", "\u03b2": "b", "\u03b5": "e", "\u03bd": "v"
+    };
+
+    function modBuildCore(word, sep) {
+        var segs = word.split(" ").map(function (part) {
+            var letters = part.split(""), out = [], i = 0;
+            while (i < letters.length) {
+                var ch = letters[i], j = i;
+                while (j + 1 < letters.length && letters[j + 1] === ch) j++;
+                var run = j - i + 1;
+                var cls = MOD_CLASSES[ch] || ("[" + ch + "]");
+                /* interior letters may be hidden with * # % (f*ck); first/last letter must be real */
+                var unit = (i > 0 && j < letters.length - 1) ? ("(?:" + cls + "|" + MOD_WILD + ")") : cls;
+                out.push(unit + "(?:" + sep + unit + "){" + (run - 1) + ",}");
+                i = j + 1;
+            }
+            return out.join(sep);
+        });
+        return segs.join(MOD_GAP);
+    }
+
+    var MOD_REGEXES = (function () {
+        var list = [];
+        MOD_STRONG.forEach(function (w) {
+            list.push(new RegExp(modBuildCore(w, MOD_SEP_STRONG), "g"));
+        });
+        MOD_WORDS.forEach(function (w) {
+            list.push(new RegExp(
+                "(?:^|[^a-z])" + MOD_PREFIX + modBuildCore(w, MOD_SEP_WORD) + MOD_SUFFIX + "?(?![a-z])", "g"));
+        });
+        return list;
+    })();
+
+    function modNormalize(s) {
+        s = String(s == null ? "" : s).slice(0, 2000).toLowerCase();
+        try { s = s.normalize("NFKD"); } catch (e) {}
+        s = s.replace(/[\u0300-\u036f]/g, "")                      /* accents */
+             .replace(/[\u200b-\u200f\u2060\ufeff\u00ad]/g, "")      /* invisible characters */
+             .replace(/\u00df/g, "ss")
+             .replace(/[\u0370-\u03ff\u0400-\u04ff]/g, function (c) { return MOD_CYR[c] || c; })  /* look-alike letters */
+             .replace(/\s+/g, " ");
+        MOD_ALLOW.forEach(function (ok) { s = s.split(ok.toLowerCase()).join(" "); });
+        return s;
+    }
+
+    /* returns { bad: true/false, match: "..." } */
+    function modLocalCheck(text) {
+        var s = modNormalize(text);
+        if (!s) return { bad: false };
+        for (var i = 0; i < MOD_REGEXES.length; i++) {
+            var re = MOD_REGEXES[i];
+            re.lastIndex = 0;
+            var m;
+            while ((m = re.exec(s)) !== null) {
+                if (m[0].length === 0) { re.lastIndex++; continue; }
+                /* ignore matches made only of digits/symbols (e.g. prices, "8080", "9490") */
+                if (/[a-z]/.test(m[0])) return { bad: true, match: m[0].trim() };
+            }
+        }
+        return { bad: false };
+    }
+
+    /* ---- talking to the Worker ------------------------------------------- */
+    function modPost(url, body, timeoutMs, cb) {
+        var done = false;
+        var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+        function finish(res) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            cb(res);
+        }
+        var timer = setTimeout(function () { if (ctl) ctl.abort(); finish(null); }, timeoutMs);
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            signal: ctl ? ctl.signal : undefined
+        }).then(function (r) { return r.json(); }).then(finish, function () { finish(null); });
+    }
+
+    /* cb(true) = text is OK, cb(false) = rejected. Local list first, then the AI. */
+    function moderateTextFull(text, cb) {
+        text = (text || "").trim();
+        if (!text) { cb(true); return; }
+        if (modLocalCheck(text).bad) { cb(false); return; }
+        modPost(MODERATE_TEXT_ENDPOINT, { text: text.slice(0, 1000) }, 10000, function (res) {
+            if (res && res.allowed === false) { cb(false); return; }
+            cb(true);   /* AI said OK, or was unreachable (the local list already passed) */
+        });
+    }
+
+    /* cb("ok") | cb("blocked") | cb("offline") */
+    function moderateImageDataUrl(dataUrl, cb) {
+        modPost(MODERATE_IMAGE_ENDPOINT, { image: dataUrl, mimeType: "image/jpeg" }, 25000, function (res) {
+            if (res && res.allowed === true) { cb("ok"); return; }
+            if (res && res.allowed === false) { cb("blocked"); return; }
+            cb(MOD_BLOCK_IMAGES_WHEN_OFFLINE ? "offline" : "ok");
+        });
+    }
+
+    /* small floating "Checking..." pill */
+    function modShowBusy(msg) {
+        var el = document.getElementById("modBusyPill");
+        if (!el) {
+            el = document.createElement("div");
+            el.id = "modBusyPill";
+            el.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100000;" +
+                "background:#0d1b4c;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;" +
+                "box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;";
+            document.body.appendChild(el);
+        }
+        el.textContent = msg || "Checking...";
+        el.style.display = "block";
+    }
+    function modHideBusy() {
+        var el = document.getElementById("modBusyPill");
+        if (el) el.style.display = "none";
+    }
+
+    /* downscale to <=512px JPEG just for the AI check (avatar is stored at 200px) */
+    function modImageForCheck(img) {
+        var max = 512, w = img.width, h = img.height;
+        if (w > h && w > max) { h = Math.round(h * (max / w)); w = max; }
+        else if (h >= w && h > max) { w = Math.round(w * (max / h)); h = max; }
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        return c.toDataURL("image/jpeg", 0.7);
+    }
+    /* ===================== END CONTENT MODERATION ===================== */
+
+
     var MenuItems = document.getElementById("MenuItems");
 
     MenuItems.style.maxHeight = "0px";
@@ -1385,6 +1601,8 @@
         var section = document.getElementById("signupSection").value.trim();
 
         if (!name || name.split(/\s+/).length < 2) return fail("Please enter your full name (first and last name) exactly as shown on your ID.", "signupName");
+        if (modLocalCheck(name).bad) return fail("Your name contains words that aren't allowed. Please enter your real name.", "signupName");
+        if (modLocalCheck(username).bad) return fail("That username contains words that aren't allowed. Please choose another.", "signupUsername");
         if (!isValidUsername(username)) return fail("Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @CVSPEE2026).", "signupUsername");
         if (isUsernameTaken(username)) return fail("That username is already taken. Please choose another.", "signupUsername");
         if (!email) return fail("Please enter your email.", "signupEmail");
@@ -2872,6 +3090,10 @@
             document.getElementById("editNameError").textContent = "Please enter your name.";
             return false;
         }
+        if (modLocalCheck(newName).bad) {
+            document.getElementById("editNameError").textContent = "That name contains words that aren't allowed. Please use your real name.";
+            return false;
+        }
 
         updateUsers(function (users) {
             for (var i = 0; i < users.length; i++) {
@@ -2914,16 +3136,27 @@
 
                 var dataUrl = canvas.toDataURL("image/jpeg", 0.72);
 
-                updateUsers(function (users) {
-                    for (var i = 0; i < users.length; i++) {
-                        if (users[i].email === user.email) {
-                            users[i].avatar = dataUrl;
-                            break;
-                        }
+                /* AI check: decline inappropriate profile pictures */
+                modShowBusy("Checking your photo...");
+                moderateImageDataUrl(modImageForCheck(img), function (verdict) {
+                    modHideBusy();
+                    if (verdict !== "ok") {
+                        input.value = "";
+                        alert(verdict === "blocked" ? MOD_MSG_IMAGE : MOD_MSG_IMAGE_OFFLINE);
+                        return;
                     }
-                    return users;
-                }, function () {
-                    renderAccount();
+
+                    updateUsers(function (users) {
+                        for (var i = 0; i < users.length; i++) {
+                            if (users[i].email === user.email) {
+                                users[i].avatar = dataUrl;
+                                break;
+                            }
+                        }
+                        return users;
+                    }, function () {
+                        renderAccount();
+                    });
                 });
             };
             img.onerror = function () {
@@ -5286,9 +5519,20 @@
         if (!input.files || !input.files[0]) return;
 
         readImageAsResizedDataUrl(input.files[0], 900, 0.7, function (dataUrl) {
-            commentPhotoDataUrl = dataUrl;
-            document.getElementById("reviewPhotoPreview").src = commentPhotoDataUrl;
-            document.getElementById("reviewPhotoPreviewWrap").style.display = "inline-block";
+            var photoErrEl = document.getElementById("reviewError");
+            modShowBusy("Checking your photo...");
+            moderateImageDataUrl(dataUrl, function (verdict) {
+                modHideBusy();
+                if (verdict !== "ok") {
+                    input.value = "";
+                    if (photoErrEl) photoErrEl.textContent = (verdict === "blocked" ? MOD_MSG_IMAGE : MOD_MSG_IMAGE_OFFLINE);
+                    return;
+                }
+                if (photoErrEl) photoErrEl.textContent = "";
+                commentPhotoDataUrl = dataUrl;
+                document.getElementById("reviewPhotoPreview").src = commentPhotoDataUrl;
+                document.getElementById("reviewPhotoPreviewWrap").style.display = "inline-block";
+            });
         }, function () {
             alert("Couldn't read that image. Please try a different photo.");
         });
@@ -6333,11 +6577,14 @@
     
     
     
+    var commentChecking = false;
+
     function updateCommentSubmitState() {
         var user = getCurrentUser();
         var submitBtn = document.querySelector(".review-form .auth-submit");
         var commentEl = document.getElementById("reviewComment");
         if (!submitBtn || !commentEl) return;
+        if (commentChecking) return;
 
         if (!user) {
             commentEl.disabled = true;
@@ -6390,23 +6637,40 @@
             return;
         }
 
-        saveComment(currentProductId, {
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar || "",
-            comment: comment,
-            date: new Date().toLocaleDateString(),
-            ts: Date.now(),
-            photo: commentPhotoDataUrl || ""
-        });
-
-        setLastCommentTsFor(user.email);
-
-        commentEl.value = "";
-        removeCommentPhoto();
+        if (commentChecking) return;
+        commentChecking = true;
+        var checkBtn = document.querySelector(".review-form .auth-submit");
+        if (checkBtn) { checkBtn.disabled = true; checkBtn.textContent = "Checking..."; }
         errorEl.textContent = "";
-        renderProductReviews(currentProductId);
-        updateCommentSubmitState();
+        var targetProductId = currentProductId;
+
+        /* block cursing / vulgar words (any language, incl. b0b0, vovo, b.o.b.o) */
+        moderateTextFull(comment, function (ok) {
+            commentChecking = false;
+            if (!ok) {
+                errorEl.textContent = MOD_MSG_TEXT;
+                updateCommentSubmitState();
+                return;
+            }
+
+            saveComment(targetProductId, {
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar || "",
+                comment: comment,
+                date: new Date().toLocaleDateString(),
+                ts: Date.now(),
+                photo: commentPhotoDataUrl || ""
+            });
+
+            setLastCommentTsFor(user.email);
+
+            commentEl.value = "";
+            removeCommentPhoto();
+            errorEl.textContent = "";
+            renderProductReviews(targetProductId);
+            updateCommentSubmitState();
+        });
     }
 
     
@@ -8620,11 +8884,20 @@
         if (!input.files || !input.files[0]) return;
 
         readImageAsResizedDataUrl(input.files[0], 900, 0.7, function (dataUrl) {
-            writeReviewPhotoDataUrl = dataUrl;
-            var preview = document.getElementById("writeReviewPhotoPreview");
-            preview.src = writeReviewPhotoDataUrl;
-            preview.style.display = "block";
-            document.getElementById("writeReviewPhotoText").textContent = "Change photo";
+            modShowBusy("Checking your photo...");
+            moderateImageDataUrl(dataUrl, function (verdict) {
+                modHideBusy();
+                if (verdict !== "ok") {
+                    input.value = "";
+                    alert(verdict === "blocked" ? MOD_MSG_IMAGE : MOD_MSG_IMAGE_OFFLINE);
+                    return;
+                }
+                writeReviewPhotoDataUrl = dataUrl;
+                var preview = document.getElementById("writeReviewPhotoPreview");
+                preview.src = writeReviewPhotoDataUrl;
+                preview.style.display = "block";
+                document.getElementById("writeReviewPhotoText").textContent = "Change photo";
+            });
         }, function () {
             alert("Couldn't read that image. Please try a different photo.");
         });
@@ -8634,7 +8907,28 @@
         document.getElementById("writeReviewSubmitBtn").disabled = writeReviewRating === 0;
     }
 
+    var writeReviewChecking = false;
+
     function submitWriteReview() {
+        if (!writeReviewOrderId || writeReviewRating === 0) return;
+        if (writeReviewChecking) return;
+
+        var reviewBtn = document.getElementById("writeReviewSubmitBtn");
+        var reviewBtnLabel = reviewBtn.textContent;
+        writeReviewChecking = true;
+        reviewBtn.disabled = true;
+        reviewBtn.textContent = "Checking...";
+
+        moderateTextFull(document.getElementById("writeReviewText").value, function (ok) {
+            writeReviewChecking = false;
+            reviewBtn.textContent = reviewBtnLabel;
+            updateWriteReviewSubmitState();
+            if (!ok) { alert(MOD_MSG_TEXT); return; }
+            doSubmitWriteReview();
+        });
+    }
+
+    function doSubmitWriteReview() {
         if (!writeReviewOrderId || writeReviewRating === 0) return;
 
         var orders = getOrders();
@@ -9107,6 +9401,7 @@
         var text = input.value.trim();
         var user = getCurrentUser();
         if (!text || !currentOrderActionId || !user) return;
+        if (modLocalCheck(text).bad) { alert(MOD_MSG_TEXT); return; }
 
         var orders = getOrders();
         var order = orders.find(function (o) { return o.id === currentOrderActionId; });
@@ -9531,6 +9826,7 @@
         var text = input.value.trim();
         var user = getCurrentUser();
         if (!text || !currentDmOtherEmail || !user) return;
+        if (modLocalCheck(text).bad) { alert(MOD_MSG_TEXT); return; }
 
         var convId = dmConvId(user.email, currentDmOtherEmail);
         var dms = getDms();
